@@ -1,43 +1,43 @@
 
 /*** EDGELIST.C ***/
 
+#include <stdio.h>
+
 #include "vdefs.h"
 
-int ELhashsize ;
-Site * bottomsite ;
-Freelist hfl ;
-Halfedge * ELleftend, * ELrightend, **ELhash ;
-
 int ntry, totalsearch ;
-
+Halfedge * ELleftend, * ELrightend, ** ELhash;
 void
-ELinitialize(void)
-    {
+ELinitialize(VoronoiState * vstate)
+{
     int i ;
-
-    freeinit(&hfl, sizeof(Halfedge)) ;
-    ELhashsize = 2 * sqrt_nsites ;
-    ELhash = (Halfedge **)myalloc( sizeof(*ELhash) * ELhashsize) ;
-    for (i = 0  ; i < ELhashsize  ; i++)
-        {
+    
+    freeinit((Freelist *)vstate->hfl, sizeof(Halfedge)) ;
+    
+    vstate->ELhashsize = 2 * sqrt_nsites ;
+        
+    ELhash = (Halfedge **)myalloc(sizeof(*(ELhash)) * vstate->ELhashsize) ;
+    
+    for (i = 0  ; i < vstate->ELhashsize  ; i++)
+    {
         ELhash[i] = (Halfedge *)NULL ;
-        }
-    ELleftend = HEcreate((Edge *)NULL, 0) ;
-    ELrightend = HEcreate((Edge *)NULL, 0) ;
+    }
+    ELleftend = HEcreate((Edge *)NULL, 0, vstate) ;
+    ELrightend = HEcreate((Edge *)NULL, 0, vstate) ;
     ELleftend->ELleft = (Halfedge *)NULL ;
     ELleftend->ELright = ELrightend ;
     ELrightend->ELleft = ELleftend ;
     ELrightend->ELright = (Halfedge *)NULL ;
     ELhash[0] = ELleftend ;
-    ELhash[ELhashsize-1] = ELrightend ;
-    }
+    ELhash[vstate->ELhashsize-1] = ELrightend ;
+}
 
 Halfedge *
-HEcreate(Edge * e, int pm)
+HEcreate(Edge * e, int pm, VoronoiState * vstate)
     {
     Halfedge * answer ;
 
-    answer = (Halfedge *)getfree(&hfl) ;
+    answer = (Halfedge *)getfree((Freelist *)vstate->hfl) ;
     answer->ELedge = e ;
     answer->ELpm = pm ;
     answer->PQnext = (Halfedge *)NULL ;
@@ -58,11 +58,11 @@ ELinsert(Halfedge * lb, Halfedge * new)
 /* Get entry from hash table, pruning any deleted nodes */
 
 Halfedge *
-ELgethash(int b)
+ELgethash(int b, VoronoiState * vstate)
     {
     Halfedge * he ;
 
-    if ((b < 0) || (b >= ELhashsize))
+    if ((b < 0) || (b >= vstate->ELhashsize))
         {
         return ((Halfedge *)NULL) ;
         }
@@ -75,37 +75,37 @@ ELgethash(int b)
     ELhash[b] = (Halfedge *)NULL ;
     if ((--(he->ELrefcnt)) == 0)
         {
-        makefree((Freenode *)he, (Freelist *)&hfl) ;
+            makefree((Freenode *)he, (Freelist *)vstate->hfl) ;
         }
     return ((Halfedge *)NULL) ;
     }
 
 Halfedge *
-ELleftbnd(Point * p)
+ELleftbnd(Point * p, VoronoiState * vstate)
     {
     int i, bucket ;
     Halfedge * he ;
 
     /* Use hash table to get close to desired halfedge */
-    bucket = (p->x - xmin) / deltax * ELhashsize ;
+    bucket = (p->x - xmin) / deltax * vstate->ELhashsize ;
     if (bucket < 0)
         {
         bucket = 0 ;
         }
-    if (bucket >= ELhashsize)
+    if (bucket >= vstate->ELhashsize)
         {
-        bucket = ELhashsize - 1 ;
+        bucket = vstate->ELhashsize - 1 ;
         }
-    he = ELgethash(bucket) ;
+    he = ELgethash(bucket, vstate) ;
     if  (he == (Halfedge *)NULL)
         {
         for (i = 1 ; 1 ; i++)
             {
-            if ((he = ELgethash(bucket-i)) != (Halfedge *)NULL)
+            if ((he = ELgethash(bucket-i,vstate)) != (Halfedge *)NULL)
                 {
                 break ;
                 }
-            if ((he = ELgethash(bucket+i)) != (Halfedge *)NULL)
+            if ((he = ELgethash(bucket+i,vstate)) != (Halfedge *)NULL)
                 {
                 break ;
                 }
@@ -128,7 +128,7 @@ ELleftbnd(Point * p)
             } while (he != ELleftend && !right_of(he,p)) ;
         }
     /*** Update hash table and reference counts ***/
-    if ((bucket > 0) && (bucket < ELhashsize-1))
+    if ((bucket > 0) && (bucket < vstate->ELhashsize-1))
         {
         if (ELhash[bucket] != (Halfedge *)NULL)
             {
@@ -165,22 +165,22 @@ ELleft(Halfedge * he)
     }
 
 Site *
-leftreg(Halfedge * he)
+leftreg(Halfedge * he, VoronoiState * vstate)
     {
     if (he->ELedge == (Edge *)NULL)
         {
-        return(bottomsite) ;
+        return(vstate->bottomsite) ;
         }
     return (he->ELpm == le ? he->ELedge->reg[le] :
         he->ELedge->reg[re]) ;
     }
 
 Site *
-rightreg(Halfedge * he)
+rightreg(Halfedge * he, VoronoiState * vstate)
     {
     if (he->ELedge == (Edge *)NULL)
         {
-        return(bottomsite) ;
+        return(vstate->bottomsite) ;
         }
     return (he->ELpm == le ? he->ELedge->reg[re] :
         he->ELedge->reg[le]) ;

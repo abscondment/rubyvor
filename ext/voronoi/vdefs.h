@@ -58,21 +58,27 @@ typedef struct tagHalfedge
     struct tagHalfedge * PQnext ;
     } Halfedge ;
 
+typedef struct tagVoronoiState
+{
+    /* edgelist.c */
+    int ELhashsize;
+    Site * bottomsite;
+    Freelist * hfl;
+} VoronoiState;
+
+extern Halfedge * ELleftend, * ELrightend, ** ELhash;
+
 /* edgelist.c */
-void ELinitialize(void) ;
-Halfedge * HEcreate(Edge *, int) ;
+void ELinitialize(VoronoiState *) ;
+Halfedge * HEcreate(Edge *, int, VoronoiState *) ;
 void ELinsert(Halfedge *, Halfedge *) ;
-Halfedge * ELgethash(int) ;
-Halfedge * ELleftbnd(Point *) ;
+Halfedge * ELgethash(int, VoronoiState *) ;
+Halfedge * ELleftbnd(Point *, VoronoiState *) ;
 void ELdelete(Halfedge *) ;
 Halfedge * ELright(Halfedge *) ;
 Halfedge * ELleft(Halfedge *) ;
-Site * leftreg(Halfedge *) ;
-Site * rightreg(Halfedge *) ;
-extern int ELhashsize ;
-extern Site * bottomsite ;
-extern Freelist hfl ;
-extern Halfedge * ELleftend, * ELrightend, **ELhash ;
+Site * leftreg(Halfedge *, VoronoiState *) ;
+Site * rightreg(Halfedge *, VoronoiState *) ;
 
 /* geometry.c */
 void geominit(void) ;
@@ -129,7 +135,7 @@ void plotinit(void) ;
 void clip_line(Edge *) ;
 
 /* voronoi.c */
-void voronoi(Site *(*)()) ;
+void voronoi(Site *(*)(), VoronoiState *) ;
 
 #endif  
 

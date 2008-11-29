@@ -12,7 +12,7 @@ void readsites(void) ;
 int sorted, triangulate, plot, debug, nsites, siteidx ;
 int repeat ;
 float xmin, xmax, ymin, ymax ;
-Site * sites ;
+Site * sites;
 Freelist sfl ;
 
 
@@ -39,7 +39,7 @@ print_memory(void)
         fscanf(pf, "%u" /* %u %u %u %u %u"*/, &size/*, &resident, &share, &text, &lib, &data*/);
         // DOMSGCAT(MSTATS, std::setprecision(4) << size / (1024.0) << "MB mem used");
         totalSize = (float)size / 1024.0;
-        fprintf(stderr, "AT %i: %f MB used by %i\n", repeat, totalSize, getpid());
+        fprintf(stderr, "%f ", totalSize);
     }
     fclose(pf);
     
@@ -51,62 +51,71 @@ main(int argc, char *argv[])
     int c ;
     Site *(*next)() ;
 
-    for (repeat=0; repeat < 2000; repeat++)
-    {
+    VoronoiState * vstate;
 
-        fprintf(stderr, "STARTING ");
-        print_memory();
-        
-    sorted = triangulate = plot = debug = 0 ;
-    while ((c = getopt(argc, argv, "dpst")) != EOF)
+    for (repeat=0; repeat < 1; repeat++)
     {
-        switch(c)
+        print_memory();
+
+
+        // Initialize vstate
+        vstate = (VoronoiState *)myalloc(sizeof(VoronoiState *));
+        vstate->hfl = (Freelist *)myalloc(sizeof(Freelist *));
+        
+        sorted = triangulate = plot = debug = 0 ;
+        while ((c = getopt(argc, argv, "dpst")) != EOF)
         {
-            case 'd':
-                debug = 1 ;
-                break ;
-            case 's':
-                sorted = 1 ;
-                break ;
-            case 't':
-                triangulate = 1 ;
-                break ;
-            case 'p':
-                plot = 1 ;
-                break ;
+            switch(c)
+            {
+                case 'd':
+                    debug = 1 ;
+                    break ;
+                case 's':
+                    sorted = 1 ;
+                    break ;
+                case 't':
+                    triangulate = 1 ;
+                    break ;
+                case 'p':
+                    plot = 1 ;
+                    break ;
             }
         }
+        
+        freeinit(&sfl, sizeof(Site)) ;
+        
+        if (sorted)
+        {
+            scanf("%d %f %f %f %f", &nsites, &xmin, &xmax, &ymin, &ymax) ;
+            next = readone ;
+        } else {
+            readsites() ;
+            next = nextone ;
+        }
+        
+        siteidx = 0 ;
+        geominit() ;
 
-    freeinit(&sfl, sizeof(Site)) ;
-    if (sorted)
-    {
-        scanf("%d %f %f %f %f", &nsites, &xmin, &xmax, &ymin, &ymax) ;
-        next = readone ;
-    } else {
-        readsites() ;
-        next = nextone ;
-    }
-    siteidx = 0 ;
-    
-    geominit() ;
-    
-    if (plot)
-    {
-        plotinit() ;
-    }
-    
-    voronoi(next) ;
+        if (plot)
+            plotinit() ;
+        
+        voronoi(next, vstate) ;
 
-    fprintf(stderr, "FREEING ");
-    print_memory();
+        print_memory();
 
-    
-	free_all();
+        free_all();
 
-    fprintf(stderr, "FREED ");
-    print_memory();
+        
+        // Free vstate
+        //free(vstate->hfl);
+        //free(vstate);
 
-    fprintf(stderr,"FINISHED ITERATION %i\n\n", repeat + 1);
+        //fprintf(stderr, "freed vstate\n");
+        
+        print_memory();
+
+        
+        fprintf(stderr,"FINISHED ITERATION %i\n", repeat + 1);
     }
     
     return (0) ;
@@ -191,7 +200,6 @@ readsites(void)
 		}
     }
 
-    fprintf(stderr, "READ BUT NO FCLOSE ");
     print_memory();
 
     

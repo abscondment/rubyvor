@@ -3,8 +3,7 @@
 
 #include "vdefs.h"
 
-extern Site * bottomsite ;
-extern Halfedge * ELleftend, * ELrightend ;
+extern Halfedge * ELlefttend, *ELrightend ;
 
 /*** implicit parameters: nsites, sqrt_nsites, xmin, xmax, ymin, ymax,
  : deltax, deltay (can all be estimates).
@@ -13,7 +12,7 @@ extern Halfedge * ELleftend, * ELrightend ;
  ***/
 
 void
-voronoi(Site *(*nextsite)(void))
+voronoi(Site *(*nextsite)(void), VoronoiState * vstate)
     {
     Site * newsite, * bot, * top, * temp, * p, * v ;
     Point newintstar ;
@@ -22,9 +21,9 @@ voronoi(Site *(*nextsite)(void))
     Edge * e ;
 
     PQinitialize() ;
-    bottomsite = (*nextsite)() ;
-    out_site(bottomsite) ;
-    ELinitialize() ;
+    vstate->bottomsite = (*nextsite)() ;
+    out_site(vstate->bottomsite) ;
+    ELinitialize(vstate) ;
     newsite = (*nextsite)() ;
     while (1)
         {
@@ -40,11 +39,11 @@ smallest */
             {
             out_site(newsite) ;
             }
-        lbnd = ELleftbnd(&(newsite->coord)) ;
+        lbnd = ELleftbnd(&(newsite->coord), vstate) ;
         rbnd = ELright(lbnd) ;
-        bot = rightreg(lbnd) ;
+        bot = rightreg(lbnd, vstate) ;
         e = bisect(bot, newsite) ;
-        bisector = HEcreate(e, le) ;
+        bisector = HEcreate(e, le, vstate) ;
         ELinsert(lbnd, bisector) ;
         p = intersect(lbnd, bisector) ;
         if (p != (Site *)NULL)
@@ -53,7 +52,7 @@ smallest */
             PQinsert(lbnd, p, dist(p,newsite)) ;
             }
         lbnd = bisector ;
-        bisector = HEcreate(e, re) ;
+        bisector = HEcreate(e, re, vstate) ;
         ELinsert(lbnd, bisector) ;
         p = intersect(bisector, rbnd) ;
         if (p != (Site *)NULL)
@@ -68,9 +67,9 @@ smallest */
             llbnd = ELleft(lbnd) ;
             rbnd = ELright(lbnd) ;
             rrbnd = ELright(rbnd) ;
-            bot = leftreg(lbnd) ;
-            top = rightreg(rbnd) ;
-            out_triple(bot, top, rightreg(lbnd)) ;
+            bot = leftreg(lbnd, vstate) ;
+            top = rightreg(rbnd, vstate) ;
+            out_triple(bot, top, rightreg(lbnd, vstate)) ;
             v = lbnd->vertex ;
             makevertex(v) ;
             endpoint(lbnd->ELedge, lbnd->ELpm, v);
@@ -87,7 +86,7 @@ smallest */
                 pm = re ;
                 }
             e = bisect(bot, top) ;
-            bisector = HEcreate(e, pm) ;
+            bisector = HEcreate(e, pm, vstate) ;
             ELinsert(llbnd, bisector) ;
             endpoint(e, re-pm, v) ;
             deref(v) ;
