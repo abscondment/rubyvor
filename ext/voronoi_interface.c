@@ -1,13 +1,11 @@
 #include <ruby.h>
-#include <voronoi/vdefs.h>
+#include <vdefs.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 static VALUE rb_mRubyVor;
 static VALUE rb_mVDDT;
 static VALUE rb_cDecomposition;
-
-Site * sites;
 
 static VALUE
 from_points(VALUE self, VALUE pointsArray)
@@ -16,6 +14,9 @@ from_points(VALUE self, VALUE pointsArray)
     VALUE * inPtr;
     ID x, y;
     long i, inSize, xsum, ysum;
+
+    // VoronoiState rubyvorState;
+    print_memory();
 
     xsum = 0;
     ysum = 0;
