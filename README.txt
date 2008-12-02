@@ -6,22 +6,22 @@ Efficient Voronoi diagrams and Delaunay trianglation for Ruby
 
 RubyVor provides efficient computation of Voronoi diagrams and
 Delaunay triangulation for a set of Ruby points. It is intended to
-function as a complemenet to GeoRuby.
+function as a complemenet to GeoRuby. These structures can be used to
+compute a nearest-neighbor graph for a set of points. This graph can
+in turn be used for proximity-based clustering of the input points.
 
 == Usage:
 
-  require 'rubyvor'
-  vddt = RubyVor::VDDT::Decomposition.from_points(georuby_points)
+TODO
 
 == LICENSE:
 
 Original public-domain C code (by Steven Fortune; http://ect.bell-labs.com/who/sjf/) and
 memory-management fixes for said C code (by Derek Bradley; http://www.derekbradley.ca)
-used and released under the MIT-LICENSE with permission.
+used (and released under the MIT-LICENSE) with permission.
 
 
 (The MIT License)
-
 
 Copyright (c) 2008 Brendan Ribera <brendan.ribera+rubyvor@gmail.com>
 
