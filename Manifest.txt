@@ -1,0 +1,15 @@
+.gitignore
+README.txt
+Rakefile
+ext/.gitignore
+ext/Doc
+ext/edgelist.c
+ext/extconf.rb
+ext/geometry.c
+ext/heap.c
+ext/memory.c
+ext/output.c
+ext/vdefs.h
+ext/voronoi.c
+ext/voronoi_interface.c
+lib/rubyvor.rb

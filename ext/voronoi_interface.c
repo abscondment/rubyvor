@@ -13,7 +13,7 @@ static int repeat;
 // Private method definitions
 static Site * readone(void), * nextone(void);
 static void readsites(void);
-static void print_memory(void);
+//static void print_memory(void);
 
 static VALUE
 from_points(VALUE self, VALUE pointsArray)
@@ -27,8 +27,11 @@ from_points(VALUE self, VALUE pointsArray)
     xsum = 0;
     ysum = 0;
     repeat = 0;
+
+    rubyvorState.triangulate = 1;
+    // hi
     
-    print_memory();
+    //print_memory();
 
     // Initialize the Site Freelist
     freeinit(&(rubyvorState.sfl), sizeof(Site)) ;
@@ -43,20 +46,19 @@ from_points(VALUE self, VALUE pointsArray)
 
 
     if (rubyvorState.plot)
-        plotinit() ;
+        plotinit();
 
     // Perform the computation
-    voronoi(next) ;
-
+    voronoi(next);
     
-    print_memory();
+    //print_memory();
 
     // Free our allocated objects
     free_all();
-        
-    print_memory();
     
-    fprintf(stderr,"FINISHED ITERATION %i\n", repeat + 1);
+    //print_memory();
+    
+    //fprintf(stderr,"FINISHED ITERATION %i\n", repeat + 1);
     
     /*
     x = rb_intern("x");
@@ -96,7 +98,7 @@ Init_voronoi_interface(void)
 
 
 
-
+/*
 static void
 print_memory(void)
 {
@@ -117,7 +119,7 @@ print_memory(void)
     pf = fopen(buf, "r");
     if (NULL != pf)
     {
-        fscanf(pf, "%u" /* %u %u %u %u %u"*/, &size/*, &resident, &share, &text, &lib, &data*/);
+        fscanf(pf, "%u", &size);//, %u, %u ... etc &resident, &share, &text, &lib, &data);
         // DOMSGCAT(MSTATS, std::setprecision(4) << size / (1024.0) << "MB mem used");
         totalSize = (float)size / 1024.0;
         fprintf(stderr, "%f ", totalSize);
@@ -125,7 +127,7 @@ print_memory(void)
     fclose(pf);
     
 }
-
+*/
 
 
 /*** sort sites on y, then x, coord ***/
@@ -207,7 +209,7 @@ readsites(void)
 		}
     }
 
-    print_memory();
+    //print_memory();
     
     // Close the file
     fclose(inputFile);

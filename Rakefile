@@ -1,9 +1,24 @@
-require 'rubygems'
-require 'rake'
-require 'rake/testtask'
-require 'rake/rdoctask'
-require 'rake/gempackagetask'
+# -*- ruby -*-
 
+
+require 'rubygems'
+require 'hoe'
+require './lib/rubyvor.rb'
+
+Hoe.new('rubyvor', RubyVor::VERSION) do |p|
+  #p.rubyforge_name = 'rubyvor'
+  p.developer('Brendan Ribera', 'brendan.ribera@gmail.com')
+end
+
+desc "Copying Phil"
+task :github do
+  system "git ls-files > Manifest.txt"
+  system "rake debug_gem | egrep -v \"^\\(in\" > rubyvor.gemspec"
+end
+
+task :gem => :github
+
+=begin
 task :default => :test
 
 desc "Run the tests"
@@ -11,7 +26,7 @@ Rake::TestTask.new do |t|
   t.test_files = FileList['test/test*.rb']
   t.verbose = true
 end
-task :test => :compile
+task :test => :compile_clean
 
 desc "Generate the documentation"
 Rake::RDocTask::new do |rdoc|
@@ -35,7 +50,7 @@ end
 
 def make(target = '')
   Dir.chdir('ext/') do
-    pid = fork { exec "#{MAKECMD} #{ MAKEOPTS} #{ target}" }
+    pid = fork { exec "#{MAKECMD} #{MAKEOPTS} #{target}" }
     Process.waitpid pid
   end
   $?.exitstatus
@@ -44,35 +59,49 @@ end
 # Let make handle dependencies between c/o/so - we'll just run it.
 file 'ext/voronoi_interface.so' => 'ext/Makefile' do
   m = make
-  fail "Make failed (status #{ m})" unless m == 0
+  fail "Make failed (status #{m})" unless m == 0
 end
 
 desc "Compile the shared object"
 task :compile => 'ext/voronoi_interface.so'
 
+desc "Regenerate Makefile and perform a clean compile of shared object"
+task :compile_clean do
+  Dir.chdir('ext/') do
+    ruby 'extconf.rb' unless File.exists?('Makefile')
+    `make clean`
+    `rm -f Makefile`
+  end
 
-=begin
+  Rake::Task[:compile].invoke
+end
+
 spec = Gem::Specification::new do |s|
   s.platform = Gem::Platform::RUBY
 
-  s.name = 'GeoRuby'
-  s.version = "1.3.3"
-  s.summary = "Ruby data holder for OGC Simple Features"
+  s.name = 'RubyVor'
+  s.version = "0.1"
+  # s.date
+  s.summary = "Efficient Voronoi diagrams and Delaunay trianglation for Ruby"
   s.description = <<EOF
-GeoRuby is intended as a holder for data returned from PostGIS and MySQL Spatial queries. The data model roughly follows the OGC "Simple Features for SQL" specification (see www.opengis.org/docs/99-049.pdf), although without any kind of advanced functionalities (such as geometric operators or reprojections)
+Efficient Voronoi diagrams and Delaunay trianglation for Ruby
 EOF
-  s.author = 'Guilhem Vellut'
-  s.email = 'guilhem.vellut@gmail.com'
-  s.homepage = "http://thepochisuperstarmegashow.com/projects/"
+  s.author = 'Brendan Ribera'
+  s.email = 'brendan.ribera@gmail.com'
+  s.homepage = "http://github.com/bribera/rubyvor"
+  s.rubyforge_project = nil
   
   s.requirements << 'none'
   s.require_path = 'lib'
-  s.files = FileList["lib/**/*.rb", "test/**/*.rb", "README","MIT-LICENSE","rakefile.rb","test/data/*.shp","test/data/*.dbf","test/data/*.shx","tools/**/*.yml","tools/**/*.rb","tools/lib/**/*"]
+  
+  s.files = FileList["lib/**/*.rb", "test/**/*.rb", "ext/*.rb", "ext/*.c", "ext/*.h", "README","MIT-LICENSE","Rakefile"]
   s.test_files = FileList['test/test*.rb']
 
   s.has_rdoc = true
   s.extra_rdoc_files = ["README"]
   s.rdoc_options.concat ['--main',  'README']
+
+  s.extensions = ['ext/extconf.rb']
 end
 
 desc "Package the library as a gem"
@@ -80,59 +109,4 @@ Rake::GemPackageTask.new(spec) do |pkg|
   pkg.need_zip = true
   pkg.need_tar = true
 end
-
-
-
-
-
-
-
-
-
-
-
-
-ooooooooooooooooooooooor
-
-
-spec = Gem::Specification.new do |s|
-  s.name = %q{teius}
-  # Note: search both lib, ext for teius.so
-  s.version = "0.11"
-  s.date = %q{2006-07-27}
-  s.summary = %q{Light-weight Ruby API to LibXML.}
-  s.email = %q{joshmh@gmail.com}
-  s.homepage = %q{http://teius.rubyforge.org}
-  s.rubyforge_project = %q{teius}
-  s.description = %q{Teius is a very lightweight Ruby API around the LibXML C library. The idea is to use a syntax reminiscent of Ruby On Rails' find method to quickly process information from an XML document.}
-  s.require_paths = [ 'lib' ]
-  s.autorequire = %q{teius}
-  s.has_rdoc = false
-  s.authors = ["Joshua Harvey"]
-  s.files = FileList[ '{test,xml,doc}/**/*', 'ext/*.rb', 'ext/*.c', 'lib/*.rb',
-    'Rakefile' ].to_a
-  s.test_file = 'test/teius_test.rb'
-  s.platform = Gem::Platform::RUBY
-  s.extensions = [ 'ext/extconf.rb' ]
-#  s.rdoc_options = ["--main", "README"]
-#  s.extra_rdoc_files = ["README"]
-end
-Rake::GemPackageTask.new(spec) do |pkg|
-pkg.need_zip = false
-pkg.need_tar = true
-end
-
-Rake::GemPackageTask.new(win_spec) do |pkg|
-pkg.need_zip = true
-pkg.need_tar = false
-end
-
-
-
-
-
-
-
-
-
 =end
