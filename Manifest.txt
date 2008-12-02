@@ -1,7 +1,7 @@
-.gitignore
+History.txt
+Manifest.txt
 README.txt
 Rakefile
-ext/.gitignore
 ext/Doc
 ext/edgelist.c
 ext/extconf.rb
@@ -12,4 +12,5 @@ ext/output.c
 ext/vdefs.h
 ext/voronoi.c
 ext/voronoi_interface.c
-lib/rubyvor.rb
+lib/ruby_vor.rb
+rubyvor.gemspec

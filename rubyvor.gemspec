@@ -7,8 +7,9 @@ Gem::Specification.new do |s|
   s.date = %q{2008-12-02}
   s.description = %q{RubyVor provides efficient computation of Voronoi diagrams and Delaunay triangulation for a set of Ruby points. It is intended to function as a complemenet to GeoRuby.}
   s.email = ["brendan.ribera@gmail.com"]
-  s.extra_rdoc_files = ["README.txt"]
-  s.files = [".gitignore", "README.txt", "Rakefile", "ext/.gitignore", "ext/Doc", "ext/edgelist.c", "ext/extconf.rb", "ext/geometry.c", "ext/heap.c", "ext/memory.c", "ext/output.c", "ext/vdefs.h", "ext/voronoi.c", "ext/voronoi_interface.c", "lib/rubyvor.rb"]
+  s.extensions = ["ext/extconf.rb"]
+  s.extra_rdoc_files = ["History.txt", "Manifest.txt", "README.txt"]
+  s.files = ["History.txt", "Manifest.txt", "README.txt", "Rakefile", "ext/Doc", "ext/edgelist.c", "ext/extconf.rb", "ext/geometry.c", "ext/heap.c", "ext/memory.c", "ext/output.c", "ext/vdefs.h", "ext/voronoi.c", "ext/voronoi_interface.c", "lib/ruby_vor.rb", "rubyvor.gemspec"]
   s.has_rdoc = true
   s.homepage = %q{Efficient Voronoi diagrams and Delaunay trianglation for Ruby}
   s.rdoc_options = ["--main", "README.txt"]
