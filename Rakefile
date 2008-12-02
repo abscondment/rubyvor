@@ -8,7 +8,7 @@ EXT = "ext/voronoi_interface.#{Hoe::DLEXT}"
 
 Hoe.new('rubyvor', RubyVor::VERSION) do |p|
   p.rubyforge_name = 'rubyvor'
-  p.developer('Brendan Ribera', 'brendan.ribera@gmail.com')
+  p.developer('Brendan Ribera', 'brendan.ribera+rubyvor@gmail.com')
   p.spec_extras[:extensions] = "ext/extconf.rb"
   p.clean_globs << EXT << 'ext/*.o' << 'ext/Makefile'
 end
