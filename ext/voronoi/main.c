@@ -9,12 +9,10 @@
 Site * readone(void), * nextone(void) ;
 void readsites(void) ;
 
-int sorted, triangulate, plot, debug, nsites, siteidx ;
-int repeat ;
-float xmin, xmax, ymin, ymax ;
-Site * sites;
-Freelist sfl ;
 
+int repeat ;
+
+VoronoiState rubyvorState;
 
 void
 print_memory(void)
@@ -51,66 +49,54 @@ main(int argc, char *argv[])
     int c ;
     Site *(*next)() ;
 
-    VoronoiState * vstate;
-
-    for (repeat=0; repeat < 1; repeat++)
+    for (repeat=0; repeat < 3; repeat++)
     {
+
         print_memory();
-
-
-        // Initialize vstate
-        vstate = (VoronoiState *)myalloc(sizeof(VoronoiState *));
-        vstate->hfl = (Freelist *)myalloc(sizeof(Freelist *));
         
-        sorted = triangulate = plot = debug = 0 ;
+        rubyvorState.sorted = rubyvorState.triangulate = rubyvorState.plot = rubyvorState.debug = 0 ;
         while ((c = getopt(argc, argv, "dpst")) != EOF)
         {
             switch(c)
             {
                 case 'd':
-                    debug = 1 ;
+                    rubyvorState.debug = 1 ;
                     break ;
                 case 's':
-                    sorted = 1 ;
+                    rubyvorState.sorted = 1 ;
                     break ;
                 case 't':
-                    triangulate = 1 ;
+                    rubyvorState.triangulate = 1 ;
                     break ;
                 case 'p':
-                    plot = 1 ;
+                    rubyvorState.plot = 1 ;
                     break ;
             }
         }
-        
-        freeinit(&sfl, sizeof(Site)) ;
-        
-        if (sorted)
+
+        freeinit(&(rubyvorState.sfl), sizeof(Site)) ;
+
+        if (rubyvorState.sorted)
         {
-            scanf("%d %f %f %f %f", &nsites, &xmin, &xmax, &ymin, &ymax) ;
+            scanf("%d %f %f %f %f", &(rubyvorState.nsites), &(rubyvorState.xmin), &(rubyvorState.xmax), &(rubyvorState.ymin), &(rubyvorState.ymax)) ;
             next = readone ;
         } else {
             readsites() ;
             next = nextone ;
         }
         
-        siteidx = 0 ;
+        rubyvorState.siteidx = 0 ;
         geominit() ;
 
-        if (plot)
+
+        if (rubyvorState.plot)
             plotinit() ;
         
-        voronoi(next, vstate) ;
+        voronoi(next) ;
 
         print_memory();
 
         free_all();
-
-        
-        // Free vstate
-        //free(vstate->hfl);
-        //free(vstate);
-
-        //fprintf(stderr, "freed vstate\n");
         
         print_memory();
 
@@ -156,9 +142,9 @@ nextone(void)
 {
     Site * s ;
 
-    if (siteidx < nsites)
+    if (rubyvorState.siteidx < rubyvorState.nsites)
     {
-        s = &sites[siteidx++];
+        s = &rubyvorState.sites[rubyvorState.siteidx++];
         return (s) ;
     }
     else
@@ -174,11 +160,11 @@ readsites(void)
 {
     int i ;
 
-    nsites = 0;
+    rubyvorState.nsites = 0;
 
     // Allocate memory for 4000 sites...
-    sites = (Site *) myalloc(4000 * sizeof(Site));
-
+    rubyvorState.sites = (Site *) myalloc(4000 * sizeof(Site));
+    
     FILE * inputFile;
 
     inputFile = fopen("test.dat", "r");
@@ -188,15 +174,15 @@ readsites(void)
         exit(0);
     }
     
-    while (fscanf(inputFile, "%f %f", &sites[nsites].coord.x, &sites[nsites].coord.y) != EOF)
+    while (fscanf(inputFile, "%f %f", &rubyvorState.sites[rubyvorState.nsites].coord.x, &rubyvorState.sites[rubyvorState.nsites].coord.y) != EOF)
     {
-        sites[nsites].sitenbr = nsites ;
-        sites[nsites++].refcnt = 0 ;
+        rubyvorState.sites[rubyvorState.nsites].sitenbr = rubyvorState.nsites ;
+        rubyvorState.sites[rubyvorState.nsites++].refcnt = 0 ;
 
         // Allocate for 4000 more if we just hit a multiple of 4000...
-        if (nsites % 4000 == 0)
+        if (rubyvorState.nsites % 4000 == 0)
 		{
-            sites = (Site *)myrealloc(sites,(nsites+4000)*sizeof(Site),nsites*sizeof(Site));
+            rubyvorState.sites = (Site *)myrealloc(rubyvorState.sites,(rubyvorState.nsites+4000)*sizeof(Site),rubyvorState.nsites*sizeof(Site));
 		}
     }
 
@@ -207,24 +193,24 @@ readsites(void)
     fclose(inputFile);
 
     // Sort the Sites
-    qsort((void *)sites, nsites, sizeof(Site), scomp) ;
+    qsort((void *)rubyvorState.sites, rubyvorState.nsites, sizeof(Site), scomp) ;
 
     // Pull the minimum values.
-    xmin = sites[0].coord.x ;
-    xmax = sites[0].coord.x ;
-    for (i = 1 ; i < nsites ; ++i)
+    rubyvorState.xmin = rubyvorState.sites[0].coord.x ;
+    rubyvorState.xmax = rubyvorState.sites[0].coord.x ;
+    for (i = 1 ; i < rubyvorState.nsites ; ++i)
         {
-        if(sites[i].coord.x < xmin)
+        if(rubyvorState.sites[i].coord.x < rubyvorState.xmin)
             {
-            xmin = sites[i].coord.x ;
+            rubyvorState.xmin = rubyvorState.sites[i].coord.x ;
             }
-        if (sites[i].coord.x > xmax)
+        if (rubyvorState.sites[i].coord.x > rubyvorState.xmax)
             {
-            xmax = sites[i].coord.x ;
+            rubyvorState.xmax = rubyvorState.sites[i].coord.x ;
             }
         }
-    ymin = sites[0].coord.y ;
-    ymax = sites[nsites-1].coord.y ;
+    rubyvorState.ymin = rubyvorState.sites[0].coord.y ;
+    rubyvorState.ymax = rubyvorState.sites[rubyvorState.nsites-1].coord.y ;
     }
 
 /*** read one site ***/
@@ -234,9 +220,9 @@ readone(void)
     {
     Site * s ;
 
-    s = (Site *)getfree(&sfl) ;
+    s = (Site *)getfree(&(rubyvorState.sfl)) ;
     s->refcnt = 0 ;
-    s->sitenbr = siteidx++ ;
+    s->sitenbr = rubyvorState.siteidx++ ;
     if (scanf("%f %f", &(s->coord.x), &(s->coord.y)) == EOF)
         {
         return ((Site *)NULL ) ;

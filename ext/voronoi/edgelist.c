@@ -1,144 +1,144 @@
 
 /*** EDGELIST.C ***/
 
-#include <stdio.h>
-
 #include "vdefs.h"
 
-int ntry, totalsearch ;
-Halfedge * ELleftend, * ELrightend, ** ELhash;
+VoronoiState rubyvorState;
+
+static int ELhashsize ;
+static Halfedge * ELleftend, * ELrightend, ** ELhash ;
+static Freelist hfl ;
+static int ntry, totalsearch ;
+
 void
-ELinitialize(VoronoiState * vstate)
+ELinitialize(void)
 {
     int i ;
-    
-    freeinit((Freelist *)vstate->hfl, sizeof(Halfedge)) ;
-    
-    vstate->ELhashsize = 2 * sqrt_nsites ;
-        
-    ELhash = (Halfedge **)myalloc(sizeof(*(ELhash)) * vstate->ELhashsize) ;
-    
-    for (i = 0  ; i < vstate->ELhashsize  ; i++)
+
+    freeinit(&hfl, sizeof(Halfedge)) ;
+    ELhashsize = 2 * rubyvorState.sqrt_nsites ;
+    ELhash = (Halfedge **)myalloc( sizeof(*ELhash) * ELhashsize) ;
+    for (i = 0  ; i < ELhashsize  ; i++)
     {
         ELhash[i] = (Halfedge *)NULL ;
     }
-    ELleftend = HEcreate((Edge *)NULL, 0, vstate) ;
-    ELrightend = HEcreate((Edge *)NULL, 0, vstate) ;
+    ELleftend = HEcreate((Edge *)NULL, 0) ;
+    ELrightend = HEcreate((Edge *)NULL, 0) ;
     ELleftend->ELleft = (Halfedge *)NULL ;
     ELleftend->ELright = ELrightend ;
     ELrightend->ELleft = ELleftend ;
     ELrightend->ELright = (Halfedge *)NULL ;
     ELhash[0] = ELleftend ;
-    ELhash[vstate->ELhashsize-1] = ELrightend ;
+    ELhash[ELhashsize-1] = ELrightend ;
 }
 
 Halfedge *
-HEcreate(Edge * e, int pm, VoronoiState * vstate)
-    {
+HEcreate(Edge * e, int pm)
+{
     Halfedge * answer ;
 
-    answer = (Halfedge *)getfree((Freelist *)vstate->hfl) ;
+    answer = (Halfedge *)getfree(&hfl) ;
     answer->ELedge = e ;
     answer->ELpm = pm ;
     answer->PQnext = (Halfedge *)NULL ;
     answer->vertex = (Site *)NULL ;
     answer->ELrefcnt = 0 ;
     return (answer) ;
-    }
+}
 
 void
 ELinsert(Halfedge * lb, Halfedge * new)
-    {
+{
     new->ELleft = lb ;
     new->ELright = lb->ELright ;
     (lb->ELright)->ELleft = new ;
     lb->ELright = new ;
-    }
+}
 
 /* Get entry from hash table, pruning any deleted nodes */
 
 Halfedge *
-ELgethash(int b, VoronoiState * vstate)
-    {
+ELgethash(int b)
+{
     Halfedge * he ;
 
-    if ((b < 0) || (b >= vstate->ELhashsize))
-        {
+    if ((b < 0) || (b >= ELhashsize))
+    {
         return ((Halfedge *)NULL) ;
-        }
+    }
     he = ELhash[b] ;
     if ((he == (Halfedge *)NULL) || (he->ELedge != (Edge *)DELETED))
-        {
+    {
         return (he) ;
-        }
+    }
     /* Hash table points to deleted half edge.  Patch as necessary. */
     ELhash[b] = (Halfedge *)NULL ;
     if ((--(he->ELrefcnt)) == 0)
-        {
-            makefree((Freenode *)he, (Freelist *)vstate->hfl) ;
-        }
-    return ((Halfedge *)NULL) ;
+    {
+        makefree((Freenode *)he, (Freelist *)&hfl) ;
     }
+    return ((Halfedge *)NULL) ;
+}
 
 Halfedge *
-ELleftbnd(Point * p, VoronoiState * vstate)
-    {
+ELleftbnd(Point * p)
+{
     int i, bucket ;
     Halfedge * he ;
 
     /* Use hash table to get close to desired halfedge */
-    bucket = (p->x - xmin) / deltax * vstate->ELhashsize ;
+    bucket = (p->x - rubyvorState.xmin) / rubyvorState.deltax * ELhashsize ;
     if (bucket < 0)
-        {
+    {
         bucket = 0 ;
-        }
-    if (bucket >= vstate->ELhashsize)
-        {
-        bucket = vstate->ELhashsize - 1 ;
-        }
-    he = ELgethash(bucket, vstate) ;
+    }
+    if (bucket >= ELhashsize)
+    {
+        bucket = ELhashsize - 1 ;
+    }
+    he = ELgethash(bucket) ;
     if  (he == (Halfedge *)NULL)
-        {
+    {
         for (i = 1 ; 1 ; i++)
+        {
+            if ((he = ELgethash(bucket-i)) != (Halfedge *)NULL)
             {
-            if ((he = ELgethash(bucket-i,vstate)) != (Halfedge *)NULL)
-                {
                 break ;
-                }
-            if ((he = ELgethash(bucket+i,vstate)) != (Halfedge *)NULL)
-                {
-                break ;
-                }
             }
-        totalsearch += i ;
+            if ((he = ELgethash(bucket+i)) != (Halfedge *)NULL)
+            {
+                break ;
+            }
         }
+        totalsearch += i ;
+    }
     ntry++ ;
     /* Now search linear list of halfedges for the corect one */
     if (he == ELleftend || (he != ELrightend && right_of(he,p)))
-        {
+    {
         do  {
             he = he->ELright ;
-            } while (he != ELrightend && right_of(he,p)) ;
+        } while (he != ELrightend && right_of(he,p)) ;
         he = he->ELleft ;
-        }
+    }
     else
-        {
+    {
         do  {
             he = he->ELleft ;
-            } while (he != ELleftend && !right_of(he,p)) ;
-        }
+        } while (he != ELleftend && !right_of(he,p)) ;
+    }
     /*** Update hash table and reference counts ***/
-    if ((bucket > 0) && (bucket < vstate->ELhashsize-1))
-        {
+    if ((bucket > 0) && (bucket < ELhashsize-1))
+    {
         if (ELhash[bucket] != (Halfedge *)NULL)
-            {
+        {
             (ELhash[bucket]->ELrefcnt)-- ;
-            }
+        }
         ELhash[bucket] = he ;
         (ELhash[bucket]->ELrefcnt)++ ;
-        }
-    return (he) ;
     }
+    return (he) ;
+}
 
 /*** This delete routine can't reclaim node, since pointers from hash
  : table may be present.
@@ -146,43 +146,61 @@ ELleftbnd(Point * p, VoronoiState * vstate)
 
 void
 ELdelete(Halfedge * he)
-    {
+{
     (he->ELleft)->ELright = he->ELright ;
     (he->ELright)->ELleft = he->ELleft ;
     he->ELedge = (Edge *)DELETED ;
-    }
+}
 
 Halfedge *
 ELright(Halfedge * he)
-    {
+{
     return (he->ELright) ;
-    }
+}
 
 Halfedge *
 ELleft(Halfedge * he)
-    {
+{
     return (he->ELleft) ;
-    }
+}
 
 Site *
-leftreg(Halfedge * he, VoronoiState * vstate)
-    {
+leftreg(Halfedge * he)
+{
     if (he->ELedge == (Edge *)NULL)
-        {
-        return(vstate->bottomsite) ;
-        }
+    {
+        return(rubyvorState.bottomsite) ;
+    }
     return (he->ELpm == le ? he->ELedge->reg[le] :
-        he->ELedge->reg[re]) ;
-    }
+            he->ELedge->reg[re]) ;
+}
 
 Site *
-rightreg(Halfedge * he, VoronoiState * vstate)
-    {
+rightreg(Halfedge * he)
+{
     if (he->ELedge == (Edge *)NULL)
-        {
-        return(vstate->bottomsite) ;
-        }
-    return (he->ELpm == le ? he->ELedge->reg[re] :
-        he->ELedge->reg[le]) ;
+    {
+        return(rubyvorState.bottomsite) ;
     }
+    return (he->ELpm == le ? he->ELedge->reg[re] :
+            he->ELedge->reg[le]) ;
+}
 
+/*
+ * Semi-hacky way to access these static variables. Placing them inside rubyvorState
+ * causes pointer issues that I don't want to debug, and they're only accessed briefly
+ * inside of voronoi.c.  Since we're just doing pointer comparison there, this is an
+ * acceptable compromise.
+ */
+
+Halfedge *
+getELleftend(void)
+{
+    return(ELleftend);
+}
+
+Halfedge *
+getELrightend(void)
+{
+    return(ELrightend);
+}

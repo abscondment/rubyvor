@@ -8,46 +8,46 @@
 #define DELETED -2
 
 typedef struct tagFreenode
-    {
+{
     struct tagFreenode * nextfree;
-    } Freenode ;
+} Freenode ;
 
 
 typedef struct tagFreelist
-    {
+{
     Freenode * head;
     int nodesize;
-    } Freelist ;
+} Freelist ;
 
 typedef struct tagPoint
-    {
+{
     float x ;
     float y ;
-    } Point ;
+} Point ;
 
 /* structure used both for sites and for vertices */
 
 typedef struct tagSite
-    {
+{
     Point coord ;
     int sitenbr ;
     int refcnt ;
-    } Site ;
+} Site ;
 
 
 typedef struct tagEdge
-    {
+{
     float a, b, c ;
     Site * ep[2] ;
     Site * reg[2] ;
     int edgenbr ;
-    } Edge ;
+} Edge ;
 
 #define le 0
 #define re 1
 
 typedef struct tagHalfedge
-    {
+{
     struct tagHalfedge * ELleft ;
     struct tagHalfedge * ELright ;
     Edge * ELedge ;
@@ -56,29 +56,40 @@ typedef struct tagHalfedge
     Site * vertex ;
     float ystar ;
     struct tagHalfedge * PQnext ;
-    } Halfedge ;
+} Halfedge ;
 
 typedef struct tagVoronoiState
 {
+    /* main function */
+    int sorted, triangulate, plot, debug, siteidx ;
+    float xmin, xmax, ymin, ymax ;
+    Site * sites ;
+    
+    /* geometry.c */
+    float deltax, deltay;
+    int nsites, nedges, sqrt_nsites, nvertices ;
+    Freelist sfl ;
+
     /* edgelist.c */
-    int ELhashsize;
-    Site * bottomsite;
-    Freelist * hfl;
+    int ELhashsize ;
+    Site * bottomsite ;
 } VoronoiState;
 
-extern Halfedge * ELleftend, * ELrightend, ** ELhash;
+extern VoronoiState rubyvorState;
 
 /* edgelist.c */
-void ELinitialize(VoronoiState *) ;
-Halfedge * HEcreate(Edge *, int, VoronoiState *) ;
+void ELinitialize(void) ;
+Halfedge * HEcreate(Edge *, int) ;
 void ELinsert(Halfedge *, Halfedge *) ;
-Halfedge * ELgethash(int, VoronoiState *) ;
-Halfedge * ELleftbnd(Point *, VoronoiState *) ;
+Halfedge * ELgethash(int) ;
+Halfedge * ELleftbnd(Point *) ;
 void ELdelete(Halfedge *) ;
 Halfedge * ELright(Halfedge *) ;
 Halfedge * ELleft(Halfedge *) ;
-Site * leftreg(Halfedge *, VoronoiState *) ;
-Site * rightreg(Halfedge *, VoronoiState *) ;
+Site * leftreg(Halfedge *) ;
+Site * rightreg(Halfedge *) ;
+Halfedge * getELleftend(void) ;
+Halfedge * getELrightend(void) ;
 
 /* geometry.c */
 void geominit(void) ;
@@ -90,9 +101,6 @@ float dist(Site *, Site *) ;
 void makevertex(Site *) ;
 void deref(Site *) ;
 void ref(Site *) ;
-extern float deltax, deltay ;
-extern int nsites, nedges, sqrt_nsites, nvertices ;
-extern Freelist sfl, efl ;
 
 /* heap.c */
 void PQinsert(Halfedge *, Site *, float) ;
@@ -102,14 +110,6 @@ int PQempty(void) ;
 Point PQ_min(void) ;
 Halfedge * PQextractmin(void) ;
 void PQinitialize(void) ;
-extern int PQmin, PQcount, PQhashsize ;
-extern Halfedge * PQhash ;
-
-/* main.c */
-extern int sorted, triangulate, plot, debug, nsites, siteidx ;
-extern float xmin, xmax, ymin, ymax ;
-extern Site * sites ;
-extern Freelist sfl ;
 
 /* getopt.c */
 extern int getopt(int, char *const *, const char *);
@@ -135,7 +135,7 @@ void plotinit(void) ;
 void clip_line(Edge *) ;
 
 /* voronoi.c */
-void voronoi(Site *(*)(), VoronoiState *) ;
+void voronoi(Site *(*)()) ;
 
 #endif  
 

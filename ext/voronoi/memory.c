@@ -6,9 +6,10 @@
 
 #include "vdefs.h"
 
-extern int sqrt_nsites, siteidx ;
-char** memory_map;
-int nallocs = 0;
+VoronoiState rubyvorState;
+
+static char** memory_map;
+static int nallocs = 0;
 
 void
 freeinit(Freelist * fl, int size)
@@ -24,8 +25,8 @@ getfree(Freelist * fl)
     Freenode * t ;
     if (fl->head == (Freenode *)NULL)
     {
-        t =  (Freenode *) myalloc(sqrt_nsites * fl->nodesize) ;
-        for(i = 0 ; i < sqrt_nsites ; i++)
+        t =  (Freenode *) myalloc(rubyvorState.sqrt_nsites * fl->nodesize) ;
+        for(i = 0 ; i < rubyvorState.sqrt_nsites ; i++)
         {
             makefree((Freenode *)((char *)t+i*fl->nodesize), fl) ;
         }
@@ -64,13 +65,12 @@ myalloc(unsigned n)
     if ((t=(char*)malloc(n)) == (char *) 0)
     {
         fprintf(stderr,"Insufficient memory processing site %d (%d bytes in use)\n",
-                siteidx, total_alloc) ;
+                rubyvorState.siteidx, total_alloc) ;
         exit(0) ;
     }
     total_alloc += n ;
     
     update_memory_map(t);
-    
     return (t) ;
 }
 
@@ -83,7 +83,7 @@ myrealloc(void * oldp, unsigned n, unsigned oldn)
     if ((newp=(char*)realloc(oldp, n)) == (char *) 0)
     {
         fprintf(stderr,"Insufficient memory processing site %d (%d bytes in use)\n",
-                siteidx, total_alloc) ;
+                rubyvorState.siteidx, total_alloc) ;
         exit(0) ;
     }
 
@@ -93,12 +93,11 @@ myrealloc(void * oldp, unsigned n, unsigned oldn)
 
     // Mark oldp as freed, since free() was called by realloc.
     for (i=0; i<nallocs; i++) {
-        if (memory_map[i] == oldp) {
+        if (memory_map[i] != (char*)0 && memory_map[i] == oldp) {
             memory_map[i] = (char*)0;
             break;
         }
     }
-    
     return (newp) ;
 }
     
@@ -106,7 +105,6 @@ myrealloc(void * oldp, unsigned n, unsigned oldn)
 void free_all(void)
 {
 	int i;
-
 	for (i=0; i<nallocs; i++)
 	{
 		if (memory_map[i] != (char*)0)
@@ -115,7 +113,6 @@ void free_all(void)
 			memory_map[i] = (char*)0;
 		}
 	}
-
 	free(memory_map);
 	nallocs = 0;
 }
