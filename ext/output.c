@@ -229,3 +229,35 @@ clip_line(Edge * e)
     }
     line(x1,y1,x2,y2);
 }
+
+/* Linux-specific. */
+void
+debug_memory(void)
+{
+    char buf[30];
+    FILE* pf;
+
+    unsigned size;//       total program size
+    unsigned resident;//   resident set size
+    unsigned share;//      shared pages
+    unsigned text;//       text (code)
+    unsigned lib;//        library
+    unsigned data;//       data/stack
+    unsigned dt;//         dirty pages (unused in Linux 2.6)
+    
+    int retVal;
+
+    float totalSize;
+    
+    snprintf(buf, 30, "/proc/%u/statm", (unsigned)getpid());
+    pf = fopen(buf, "r");
+    if (NULL != pf)
+    {
+        retVal = fscanf(pf, "%u", &size);
+        //, %u, %u ... etc &resident, &share, &text, &lib, &data);
+        
+        totalSize = (float)size / 1024.0;
+        fprintf(stderr, "%f ", totalSize);
+    }
+    fclose(pf);
+}

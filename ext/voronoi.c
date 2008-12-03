@@ -1,7 +1,7 @@
 
 /*** VORONOI.C ***/
 
-#include "vdefs.h"
+#include <vdefs.h>
 
 /*** implicit parameters: nsites, sqrt_nsites, xmin, xmax, ymin, ymax,
  : deltax, deltay (can all be estimates).

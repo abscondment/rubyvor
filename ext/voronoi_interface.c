@@ -14,9 +14,6 @@ static int repeat, rit;
 static Site * readone(void), * nextone(void);
 static int scomp(const void *, const void *);
 static void storeTriangulationTriplet(const int, const int, const int);
-    
-//static void print_memory(void);
-
 
 
 static VALUE
@@ -63,7 +60,7 @@ from_points(VALUE self, VALUE pointsArray)
     rubyvorState.decomp = (void *) &newDecomp;
     
     
-    //print_memory();
+    //debug_memory();
 
     // Initialize the Site Freelist
     freeinit(&(rubyvorState.sfl), sizeof(Site)) ;
@@ -127,12 +124,12 @@ from_points(VALUE self, VALUE pointsArray)
     // Perform the computation
     voronoi(next);
     
-    //print_memory();
+    //debug_memory();
 
     // Free our allocated objects
     free_all();
     
-    //print_memory();
+    //debug_memory();
     
     //fprintf(stderr,"FINISHED ITERATION %i\n", repeat + 1);
     
@@ -152,39 +149,6 @@ Init_voronoi_interface(void)
     // Add methods.
     rb_define_singleton_method(rb_cDecomposition, "from_points", from_points, 1);
 }
-
-
-
-/*
-static void
-print_memory(void)
-{
-    char buf[30];
-    FILE* pf;
-
-    unsigned size; //       total program size
-    unsigned resident;//   resident set size
-    unsigned share;//      shared pages
-    unsigned text;//       text (code)
-    unsigned lib;//        library
-    unsigned data;//       data/stack
-    unsigned dt;//         dirty pages (unused in Linux 2.6)
-
-    float totalSize;
-    
-    snprintf(buf, 30, "/proc/%u/statm", (unsigned)getpid());
-    pf = fopen(buf, "r");
-    if (NULL != pf)
-    {
-        fscanf(pf, "%u", &size);//, %u, %u ... etc &resident, &share, &text, &lib, &data);
-        // DOMSGCAT(MSTATS, std::setprecision(4) << size / (1024.0) << "MB mem used");
-        totalSize = (float)size / 1024.0;
-        fprintf(stderr, "%f ", totalSize);
-    }
-    fclose(pf);
-    
-}
-*/
 
 
 static void

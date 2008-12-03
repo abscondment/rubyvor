@@ -135,6 +135,7 @@ void out_site(Site *) ;
 void out_triple(Site *, Site *, Site *) ;
 void plotinit(void) ;
 void clip_line(Edge *) ;
+void debug_memory(void);
 
 /* voronoi.c */
 void voronoi(Site *(*)()) ;
