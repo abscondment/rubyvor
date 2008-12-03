@@ -12,7 +12,8 @@ static int repeat;
 
 // Private method definitions
 static Site * readone(void), * nextone(void);
-static void readsites(void);
+static int scomp(const void *, const void *);
+
 //static void print_memory(void);
 
 static VALUE
@@ -21,23 +22,85 @@ from_points(VALUE self, VALUE pointsArray)
     //VALUE returnValue;
     VALUE * inPtr;
     ID x, y;
-    long i, inSize, xsum, ysum;
+    float inx, iny, xsum, ysum;;
+    long i, inSize;
     Site *(*next)() ;
 
     xsum = 0;
     ysum = 0;
     repeat = 0;
 
+    // Set up our initial state
     rubyvorState.triangulate = 1;
-    // hi
+    rubyvorState.nsites = 0;
+    
+    x = rb_intern("x");
+    y = rb_intern("y");
+    
+    inSize = RARRAY(pointsArray)->len;
+    inPtr  = RARRAY(pointsArray)->ptr;
+
+    // Require x & y methods
+    if (inSize < 1 || !rb_respond_to(inPtr[0], x) || !rb_respond_to(inPtr[0], y))
+        rb_raise(rb_eRuntimeError, "target must respond to 'x' and 'y' and have a nonzero length");
     
     //print_memory();
 
     // Initialize the Site Freelist
     freeinit(&(rubyvorState.sfl), sizeof(Site)) ;
 
-    // Read in the sites
-    readsites() ;
+    //
+    // Read in the sites, sort, and compute xmin, xmax, ymin, ymax
+    //
+
+    // Allocate memory for 4000 sites...
+    rubyvorState.sites = (Site *) myalloc(4000 * sizeof(Site));
+    
+    
+    // Iterate over the arrays, doubling the incoming values.
+    for (i=0; i<inSize; i++)
+    {
+        rubyvorState.sites[rubyvorState.nsites].coord.x = NUM2DBL(rb_funcall(inPtr[i], x, 0));
+        rubyvorState.sites[rubyvorState.nsites].coord.y = NUM2DBL(rb_funcall(inPtr[i], y, 0));
+
+        // TODO remove these
+        xsum += rubyvorState.sites[rubyvorState.nsites].coord.x;
+        ysum += rubyvorState.sites[rubyvorState.nsites].coord.y;
+
+        //fprintf(stderr, "adding point (%f, %f) -> (%f, %f)\n", inx, iny, rubyvorState.sites[rubyvorState.nsites].coord.x, rubyvorState.sites[rubyvorState.nsites].coord.y);
+        
+        // 
+        rubyvorState.sites[rubyvorState.nsites].sitenbr = rubyvorState.nsites;
+        rubyvorState.sites[rubyvorState.nsites++].refcnt = 0;
+
+        // Allocate for 4000 more if we just hit a multiple of 4000...
+        if (rubyvorState.nsites % 4000 == 0)
+		{
+            rubyvorState.sites = (Site *)myrealloc(rubyvorState.sites,(rubyvorState.nsites+4000)*sizeof(Site),rubyvorState.nsites*sizeof(Site));
+		}
+    }
+
+    // Sort the Sites
+    qsort((void *)rubyvorState.sites, rubyvorState.nsites, sizeof(Site), scomp) ;
+
+    // Pull the minimum values.
+    rubyvorState.xmin = rubyvorState.sites[0].coord.x;
+    rubyvorState.xmax = rubyvorState.sites[0].coord.x;
+    for (i=1; i < rubyvorState.nsites; ++i)
+    {
+        if (rubyvorState.sites[i].coord.x < rubyvorState.xmin)
+        {
+            rubyvorState.xmin = rubyvorState.sites[i].coord.x;
+        }
+        if (rubyvorState.sites[i].coord.x > rubyvorState.xmax)
+        {
+            rubyvorState.xmax = rubyvorState.sites[i].coord.x;
+        }
+    }
+    rubyvorState.ymin = rubyvorState.sites[0].coord.y;
+    rubyvorState.ymax = rubyvorState.sites[rubyvorState.nsites-1].coord.y;
+
+
     next = nextone;
 
     // Initialize the geometry module
@@ -60,28 +123,7 @@ from_points(VALUE self, VALUE pointsArray)
     
     //fprintf(stderr,"FINISHED ITERATION %i\n", repeat + 1);
     
-    /*
-    x = rb_intern("x");
-    y = rb_intern("y");
-    
-    inSize = RARRAY(pointsArray)->len;
-    inPtr  = RARRAY(pointsArray)->ptr;
-
-    // Require x & y methods
-    if (inSize < 1 || !rb_respond_to(inPtr[0], x) || !rb_respond_to(inPtr[0], y))
-        rb_raise(rb_eRuntimeError, "target must respond to 'x' and 'y' and have a nonzero length");
-
-    // Iterate over the arrays, doubling the incoming values.
-    for (i=0; i<inSize; i++)
-    {
-        xsum += FIX2INT(rb_funcall(inPtr[i], x, 0));
-        ysum += FIX2INT(rb_funcall(inPtr[i], y, 0));
-    }
-    
-    print_memory();
-    */
-    
-    return LONG2FIX(xsum - ysum);
+    return rb_float_new(xsum + ysum);
 }
 
 void
@@ -173,66 +215,6 @@ nextone(void)
     {
         return ((Site *)NULL) ;
     }
-}
-
-/*** read all sites, sort, and compute xmin, xmax, ymin, ymax ***/
-
-static void
-readsites(void)
-{
-    int i ;
-
-    rubyvorState.nsites = 0;
-
-    // Allocate memory for 4000 sites...
-    rubyvorState.sites = (Site *) myalloc(4000 * sizeof(Site));
-    
-    FILE * inputFile;
-
-    inputFile = fopen("test.dat", "r");
-
-    if (NULL==inputFile)
-    {
-        fprintf(stderr, "Input file missing.");
-        exit(0);
-    }
-    
-    while (fscanf(inputFile, "%f %f", &rubyvorState.sites[rubyvorState.nsites].coord.x, &rubyvorState.sites[rubyvorState.nsites].coord.y) != EOF)
-    {
-        rubyvorState.sites[rubyvorState.nsites].sitenbr = rubyvorState.nsites ;
-        rubyvorState.sites[rubyvorState.nsites++].refcnt = 0 ;
-
-        // Allocate for 4000 more if we just hit a multiple of 4000...
-        if (rubyvorState.nsites % 4000 == 0)
-		{
-            rubyvorState.sites = (Site *)myrealloc(rubyvorState.sites,(rubyvorState.nsites+4000)*sizeof(Site),rubyvorState.nsites*sizeof(Site));
-		}
-    }
-
-    //print_memory();
-    
-    // Close the file
-    fclose(inputFile);
-
-    // Sort the Sites
-    qsort((void *)rubyvorState.sites, rubyvorState.nsites, sizeof(Site), scomp) ;
-
-    // Pull the minimum values.
-    rubyvorState.xmin = rubyvorState.sites[0].coord.x ;
-    rubyvorState.xmax = rubyvorState.sites[0].coord.x ;
-    for (i = 1 ; i < rubyvorState.nsites ; ++i)
-    {
-        if(rubyvorState.sites[i].coord.x < rubyvorState.xmin)
-        {
-            rubyvorState.xmin = rubyvorState.sites[i].coord.x ;
-        }
-        if (rubyvorState.sites[i].coord.x > rubyvorState.xmax)
-        {
-            rubyvorState.xmax = rubyvorState.sites[i].coord.x ;
-        }
-    }
-    rubyvorState.ymin = rubyvorState.sites[0].coord.y ;
-    rubyvorState.ymax = rubyvorState.sites[rubyvorState.nsites-1].coord.y ;
 }
 
 /*** read one site ***/
