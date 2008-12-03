@@ -90,10 +90,11 @@ out_triple(Site * s1, Site * s2, Site * s3)
 {
     if (rubyvorState.triangulate && !rubyvorState.plot && !rubyvorState.debug)
     {
-        printf("%d %d %d\n", s1->sitenbr, s2->sitenbr, s3->sitenbr) ;
+        (*rubyvorState.storeT)(s1->sitenbr, s2->sitenbr, s3->sitenbr);
     }
     if (rubyvorState.debug)
     {
+        printf("%d %d %d\n", s1->sitenbr, s2->sitenbr, s3->sitenbr);
         printf("circle through left=%d right=%d bottom=%d\n",
                s1->sitenbr, s2->sitenbr, s3->sitenbr) ;
     }

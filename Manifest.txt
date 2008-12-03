@@ -13,6 +13,8 @@ ext/vdefs.h
 ext/voronoi.c
 ext/voronoi_interface.c
 lib/ruby_vor.rb
+lib/ruby_vor/decomposition.rb
 lib/ruby_vor/point.rb
 lib/ruby_vor/version.rb
 rubyvor.gemspec
+test/test_voronoi_interface.rb

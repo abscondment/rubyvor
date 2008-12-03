@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.email = ["brendan.ribera+rubyvor@gmail.com"]
   s.extensions = ["ext/extconf.rb"]
   s.extra_rdoc_files = ["History.txt", "Manifest.txt", "README.txt"]
-  s.files = ["History.txt", "Manifest.txt", "README.txt", "Rakefile", "ext/Doc", "ext/edgelist.c", "ext/extconf.rb", "ext/geometry.c", "ext/heap.c", "ext/memory.c", "ext/output.c", "ext/vdefs.h", "ext/voronoi.c", "ext/voronoi_interface.c", "lib/ruby_vor.rb", "lib/ruby_vor/point.rb", "lib/ruby_vor/version.rb", "rubyvor.gemspec"]
+  s.files = ["History.txt", "Manifest.txt", "README.txt", "Rakefile", "ext/Doc", "ext/edgelist.c", "ext/extconf.rb", "ext/geometry.c", "ext/heap.c", "ext/memory.c", "ext/output.c", "ext/vdefs.h", "ext/voronoi.c", "ext/voronoi_interface.c", "lib/ruby_vor.rb", "lib/ruby_vor/decomposition.rb", "lib/ruby_vor/point.rb", "lib/ruby_vor/version.rb", "rubyvor.gemspec", "test/test_voronoi_interface.rb"]
   s.has_rdoc = true
   s.homepage = %q{Efficient Voronoi diagrams and Delaunay trianglation for Ruby}
   s.rdoc_options = ["--main", "README.txt"]
@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
   s.rubyforge_project = %q{rubyvor}
   s.rubygems_version = %q{1.2.0}
   s.summary = %q{RubyVor provides efficient computation of Voronoi diagrams and Delaunay triangulation for a set of Ruby points}
+  s.test_files = ["test/test_voronoi_interface.rb"]
 
   if s.respond_to? :specification_version then
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION

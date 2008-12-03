@@ -8,41 +8,60 @@ VoronoiState rubyvorState;
 static VALUE rb_mRubyVor;
 static VALUE rb_mVDDT;
 static VALUE rb_cDecomposition;
-static int repeat;
+static int repeat, rit;
 
 // Private method definitions
 static Site * readone(void), * nextone(void);
 static int scomp(const void *, const void *);
-
+static void storeTriangulationTriplet(const int, const int, const int);
+    
 //static void print_memory(void);
+
+
 
 static VALUE
 from_points(VALUE self, VALUE pointsArray)
 {
     //VALUE returnValue;
-    VALUE * inPtr;
+    VALUE * inPtr, newDecomp;
     ID x, y;
-    float inx, iny, xsum, ysum;;
+
     long i, inSize;
     Site *(*next)() ;
 
-    xsum = 0;
-    ysum = 0;
-    repeat = 0;
-
+    // TODO: remove
+    repeat = 1;
+    
+    for (rit = 0; rit < repeat; rit++) {
+        
     // Set up our initial state
     rubyvorState.triangulate = 1;
     rubyvorState.nsites = 0;
-    
+    rubyvorState.storeT = storeTriangulationTriplet;
+
+    // Require T_ARRAY
+    Check_Type(pointsArray, T_ARRAY);
+
+    // Intern our point access methods
     x = rb_intern("x");
     y = rb_intern("y");
-    
+
+    // Load up point count & points pointer.
     inSize = RARRAY(pointsArray)->len;
     inPtr  = RARRAY(pointsArray)->ptr;
 
-    // Require x & y methods
-    if (inSize < 1 || !rb_respond_to(inPtr[0], x) || !rb_respond_to(inPtr[0], y))
-        rb_raise(rb_eRuntimeError, "target must respond to 'x' and 'y' and have a nonzero length");
+    // Require nonzero size and x & y methods on each array object
+    if (inSize < 1)
+        rb_raise(rb_eRuntimeError, "points array have a nonzero length");
+    for (i = 0; i < inSize; i++) {
+        if(!rb_respond_to(inPtr[i], x) || !rb_respond_to(inPtr[i], y))
+            rb_raise(rb_eRuntimeError, "members of points array must respond to 'x' and 'y'");
+    }
+
+    // Create our return object.
+    newDecomp = rb_funcall(self, rb_intern("new"), 0);
+    rubyvorState.decomp = (void *) &newDecomp;
+    
     
     //print_memory();
 
@@ -63,12 +82,6 @@ from_points(VALUE self, VALUE pointsArray)
         rubyvorState.sites[rubyvorState.nsites].coord.x = NUM2DBL(rb_funcall(inPtr[i], x, 0));
         rubyvorState.sites[rubyvorState.nsites].coord.y = NUM2DBL(rb_funcall(inPtr[i], y, 0));
 
-        // TODO remove these
-        xsum += rubyvorState.sites[rubyvorState.nsites].coord.x;
-        ysum += rubyvorState.sites[rubyvorState.nsites].coord.y;
-
-        //fprintf(stderr, "adding point (%f, %f) -> (%f, %f)\n", inx, iny, rubyvorState.sites[rubyvorState.nsites].coord.x, rubyvorState.sites[rubyvorState.nsites].coord.y);
-        
         // 
         rubyvorState.sites[rubyvorState.nsites].sitenbr = rubyvorState.nsites;
         rubyvorState.sites[rubyvorState.nsites++].refcnt = 0;
@@ -123,7 +136,9 @@ from_points(VALUE self, VALUE pointsArray)
     
     //fprintf(stderr,"FINISHED ITERATION %i\n", repeat + 1);
     
-    return rb_float_new(xsum + ysum);
+    }
+    
+    return newDecomp;
 }
 
 void
@@ -171,6 +186,26 @@ print_memory(void)
 }
 */
 
+
+static void
+storeTriangulationTriplet(const int a, const int b, const int c)
+{
+    VALUE trArray, triplet;
+
+    // Create a new triplet from the three incoming points
+    triplet = rb_ary_new2(3);
+    RARRAY(triplet)->len = 3;
+    RARRAY(triplet)->ptr[0] = INT2FIX(a);
+    RARRAY(triplet)->ptr[1] = INT2FIX(b);
+    RARRAY(triplet)->ptr[2] = INT2FIX(c);
+
+    // Get the existing raw triangulation
+    trArray = rb_funcall(*(VALUE *)rubyvorState.decomp, rb_intern("triangulation_raw"), 0);
+
+    // Add the new triplet to it
+    rb_ary_push(trArray, triplet);
+
+}
 
 /*** sort sites on y, then x, coord ***/
 

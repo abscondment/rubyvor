@@ -64,6 +64,8 @@ typedef struct tagVoronoiState
     int sorted, triangulate, plot, debug, siteidx ;
     float xmin, xmax, ymin, ymax ;
     Site * sites ;
+    void * decomp;
+    void (* storeT)(int, int, int);
     
     /* geometry.c */
     float deltax, deltay;
