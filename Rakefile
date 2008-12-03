@@ -7,8 +7,11 @@ require './lib/ruby_vor/version.rb'
 EXT = "ext/voronoi_interface.#{Hoe::DLEXT}"
 
 Hoe.new('rubyvor', RubyVor::VERSION) do |p|
-  p.rubyforge_name = 'rubyvor'
   p.developer('Brendan Ribera', 'brendan.ribera+rubyvor@gmail.com')
+  
+  p.url = 'http://github.com/bribera/rubyvor'
+
+  # C extension goodness
   p.spec_extras[:extensions] = "ext/extconf.rb"
   p.clean_globs << EXT << 'ext/*.o' << 'ext/Makefile'
 end
