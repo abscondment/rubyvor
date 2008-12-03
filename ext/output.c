@@ -24,74 +24,70 @@ void range(float pxmin, float pxmax, float pymin, float pymax) {}
 void
 out_bisector(Edge * e)
 {
-    if (rubyvorState.triangulate && rubyvorState.plot && !rubyvorState.debug)
-    {
-        line(e->reg[0]->coord.x, e->reg[0]->coord.y,
-             e->reg[1]->coord.x, e->reg[1]->coord.y) ;
-    }
-    if (!rubyvorState.triangulate && !rubyvorState.plot && !rubyvorState.debug)
-    {
-        printf("l %f %f %f\n", e->a, e->b, e->c) ;
-    }
+    // Save line to our ruby object
+    (*rubyvorState.storeL)(e->a, e->b, e->c);
+
+    
+    // printf("l %f %f %f\n", e->a, e->b, e->c);
+    
+    if (rubyvorState.plot)
+        line(e->reg[0]->coord.x, e->reg[0]->coord.y, e->reg[1]->coord.x, e->reg[1]->coord.y);
+    
     if (rubyvorState.debug)
-    {
-        printf("line(%d) %gx+%gy=%g, bisecting %d %d\n", e->edgenbr,
-        e->a, e->b, e->c, e->reg[le]->sitenbr, e->reg[re]->sitenbr) ;
-    }
+        printf("line(%d) %gx+%gy=%g, bisecting %d %d\n", e->edgenbr, e->a, e->b, e->c, e->reg[le]->sitenbr, e->reg[re]->sitenbr);
 }
 
 void
 out_ep(Edge * e)
 {
-    if (!rubyvorState.triangulate && rubyvorState.plot)
-    {
-        clip_line(e) ;
-    }
-    if (!rubyvorState.triangulate && !rubyvorState.plot)
-    {
+    // Save endpoint to our ruby object
+    (*rubyvorState.storeE)(e->edgenbr,
+                           e->ep[le] != (Site *)NULL ? e->ep[le]->sitenbr : -1,
+                           e->ep[re] != (Site *)NULL ? e->ep[re]->sitenbr : -1);
+    
+    /*
         printf("e %d", e->edgenbr);
         printf(" %d ", e->ep[le] != (Site *)NULL ? e->ep[le]->sitenbr : -1) ;
         printf("%d\n", e->ep[re] != (Site *)NULL ? e->ep[re]->sitenbr : -1) ;
-    }
+    */
+
+    if (rubyvorState.plot)
+        clip_line(e) ;
 }
 
 void
 out_vertex(Site * v)
 {
-    if (!rubyvorState.triangulate && !rubyvorState.plot && !rubyvorState.debug)
-    {
-        printf ("v %f %f\n", v->coord.x, v->coord.y) ;
-    }
+    // Save vertex to our ruby object
+    (*rubyvorState.storeV)(v->coord.x, v->coord.y);
+    
+    // printf ("v %f %f\n", v->coord.x, v->coord.y) ;
+    
     if (rubyvorState.debug)
-    {
-        printf("vertex(%d) at %f %f\n", v->sitenbr, v->coord.x, v->coord.y) ;
-    }
+        printf("vertex(%d) at %f %f\n", v->sitenbr, v->coord.x, v->coord.y);
 }
 
 void
 out_site(Site * s)
 {
-    if (!rubyvorState.triangulate && rubyvorState.plot && !rubyvorState.debug)
-    {
-        circle (s->coord.x, s->coord.y, cradius) ;
-    }
-    if (!rubyvorState.triangulate && !rubyvorState.plot && !rubyvorState.debug)
-    {
-        printf("s %f %f\n", s->coord.x, s->coord.y) ;
-    }
+    // Save site to our ruby object
+    (*rubyvorState.storeS)(s->coord.x, s->coord.y);
+
+    //printf("s %f %f\n", s->coord.x, s->coord.y) ;
+
+    if (rubyvorState.plot)
+        circle (s->coord.x, s->coord.y, cradius);
+    
     if (rubyvorState.debug)
-    {
-        printf("site (%d) at %f %f\n", s->sitenbr, s->coord.x, s->coord.y) ;
-    }
+        printf("site (%d) at %f %f\n", s->sitenbr, s->coord.x, s->coord.y);
 }
 
 void
 out_triple(Site * s1, Site * s2, Site * s3)
 {
-    if (rubyvorState.triangulate && !rubyvorState.plot && !rubyvorState.debug)
-    {
-        (*rubyvorState.storeT)(s1->sitenbr, s2->sitenbr, s3->sitenbr);
-    }
+    // Save triplet to our ruby object
+    (*rubyvorState.storeT)(s1->sitenbr, s2->sitenbr, s3->sitenbr);
+    
     if (rubyvorState.debug)
     {
         printf("%d %d %d\n", s1->sitenbr, s2->sitenbr, s3->sitenbr);
@@ -234,6 +230,9 @@ clip_line(Edge * e)
 void
 debug_memory(void)
 {
+    if (!rubyvorState.debug)
+        return;
+    
     char buf[30];
     FILE* pf;
 

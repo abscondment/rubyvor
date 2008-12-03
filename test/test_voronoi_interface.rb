@@ -8,7 +8,7 @@ class TestVoronoiInterface < MiniTest::Unit::TestCase
     decomp = RubyVor::VDDT::Decomposition.from_points(sample_points)
 
     # Compare results.
-    assert_equal example_triangulation, decomp.triangulation_raw
+    assert_equal example_triangulation, decomp.delaunay_triangulation_raw
   end
 
   private

@@ -60,21 +60,25 @@ typedef struct tagHalfedge
 
 typedef struct tagVoronoiState
 {
-    /* main function */
-    int sorted, triangulate, plot, debug, siteidx ;
-    float xmin, xmax, ymin, ymax ;
-    Site * sites ;
+    /* voronoi.c */
+    int sorted, plot, debug, siteidx;
+    float xmin, xmax, ymin, ymax;
+    Site * sites;
     void * decomp;
     void (* storeT)(int, int, int);
+    void (* storeL)(float, float, float);
+    void (* storeE)(int, int, int);
+    void (* storeV)(float, float);
+    void (* storeS)(float, float);
     
     /* geometry.c */
     float deltax, deltay;
-    int nsites, nedges, sqrt_nsites, nvertices ;
-    Freelist sfl ;
+    int nsites, nedges, sqrt_nsites, nvertices;
+    Freelist sfl;
 
     /* edgelist.c */
-    int ELhashsize ;
-    Site * bottomsite ;
+    int ELhashsize;
+    Site * bottomsite;
 } VoronoiState;
 
 extern VoronoiState rubyvorState;
@@ -139,7 +143,7 @@ void debug_memory(void);
 
 /* voronoi.c */
 void voronoi(Site *(*)()) ;
-
+void initialize_state(int);
 #endif  
 
 
