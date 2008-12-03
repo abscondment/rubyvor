@@ -1,3 +1,7 @@
+=== 0.0.3 / 2008-12-03
+
+* Fixed a segfault by using rb_ary_push instead of direct pointer manipulation. Much simpler.
+
 === 0.0.2 / 2008-12-03
 
 * Computations succeed on a naive Point class, returning raw values for the associated Voronoi Diagram and Delaunay triangulation.

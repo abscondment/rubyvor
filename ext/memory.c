@@ -115,6 +115,4 @@ void free_all(void)
 	}
 	free(memory_map);
 	nallocs = 0;
-
-    debug_memory();
 }

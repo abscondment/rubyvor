@@ -3,7 +3,7 @@
 
 #include <ruby.h>
 #include <vdefs.h>
-
+#include <stdio.h>
 
 // Static method definitions: C -> Ruby storage methods.
 static void storeTriangulationTriplet(const int, const int, const int);
@@ -41,8 +41,6 @@ void initialize_state(int debug)
     // TODO: remove C plot references
     if (rubyvorState.plot)
         plotinit();
-    
-    debug_memory();
 }
 
 void
@@ -50,28 +48,36 @@ voronoi(Site *(*nextsite)(void))
 {
     Site * newsite, * bot, * top, * temp, * p, * v ;
     Point newintstar ;
-    int pm ;
+    int pm , c;
     Halfedge * lbnd, * rbnd, * llbnd, * rrbnd, * bisector ;
     Edge * e ;
 
+    c = 0;
+    
     PQinitialize() ;
     rubyvorState.bottomsite = (*nextsite)() ;
+    if (rubyvorState.debug) fprintf(stderr, "bnys ");
     out_site(rubyvorState.bottomsite) ;
     ELinitialize() ;
     newsite = (*nextsite)() ;
+    
     while (1)
     {
+        
+        if (rubyvorState.debug) fprintf(stderr, "%d ", c++);
+        
         if(!PQempty())
-        {
             newintstar = PQ_min() ;
-        }
+        
         if (newsite != (Site *)NULL && (PQempty()
             || newsite -> coord.y < newintstar.y
             || (newsite->coord.y == newintstar.y
             && newsite->coord.x < newintstar.x)))
         {
+            if (rubyvorState.debug) fprintf(stderr, "nss ");
             /* new site is smallest */
             {
+                if (rubyvorState.debug) fprintf(stderr, "bnys ");
                 out_site(newsite) ;
             }
             lbnd = ELleftbnd(&(newsite->coord)) ;
@@ -98,12 +104,14 @@ voronoi(Site *(*nextsite)(void))
         }
         else if (!PQempty())   /* intersection is smallest */
         {
+            if (rubyvorState.debug) fprintf(stderr, "!pqe ");
             lbnd = PQextractmin() ;
             llbnd = ELleft(lbnd) ;
             rbnd = ELright(lbnd) ;
             rrbnd = ELright(rbnd) ;
             bot = leftreg(lbnd) ;
             top = rightreg(rbnd) ;
+            if (rubyvorState.debug) fprintf(stderr, "bnyt ");
             out_triple(bot, top, rightreg(lbnd)) ;
             v = lbnd->vertex ;
             makevertex(v) ;
@@ -148,11 +156,9 @@ voronoi(Site *(*nextsite)(void))
          lbnd = ELright(lbnd))
     {
         e = lbnd->ELedge ;
+        if (rubyvorState.debug) fprintf(stderr, "bnye ");
         out_ep(e) ;
     }
-
-    // After completing calculations
-    debug_memory();
 }
 
 
@@ -171,10 +177,9 @@ storeTriangulationTriplet(const int a, const int b, const int c)
 
     // Create a new triplet from the three incoming points
     triplet = rb_ary_new2(3);
-    RARRAY(triplet)->len = 3;
-    RARRAY(triplet)->ptr[0] = INT2FIX(a);
-    RARRAY(triplet)->ptr[1] = INT2FIX(b);
-    RARRAY(triplet)->ptr[2] = INT2FIX(c);
+    rb_ary_push(triplet, INT2FIX(a));
+    rb_ary_push(triplet, INT2FIX(b));
+    rb_ary_push(triplet, INT2FIX(c));
 
     // Get the existing raw triangulation
     trArray = rb_funcall(*(VALUE *)rubyvorState.decomp, rb_intern("delaunay_triangulation_raw"), 0);
@@ -192,17 +197,16 @@ storeLine(const float a, const float b, const float c)
     
     // Create a new line from the three values
     line = rb_ary_new2(4);
-    RARRAY(line)->len = 4;
-    RARRAY(line)->ptr[0] = ID2SYM(rb_intern("l"));
-    RARRAY(line)->ptr[1] = rb_float_new(a);
-    RARRAY(line)->ptr[2] = rb_float_new(b);
-    RARRAY(line)->ptr[3] = rb_float_new(c);
+    rb_ary_push(line, ID2SYM(rb_intern("l")));
+    rb_ary_push(line, rb_float_new(a));
+    rb_ary_push(line, rb_float_new(b));
+    rb_ary_push(line, rb_float_new(c));
 
     // Get the existing raw voronoi diagram
     lArray = rb_funcall(*(VALUE *)rubyvorState.decomp, rb_intern("voronoi_diagram_raw"), 0);
 
     // Add the new line to it
-    rb_ary_push(lArray, line);    
+    rb_ary_push(lArray, line);
 }
 
 
@@ -218,17 +222,16 @@ storeEndpoint(const int l, const int v1, const int v2)
     
     // Create a new endpoint from the three values
     endpoint = rb_ary_new2(4);
-    RARRAY(endpoint)->len = 4;
-    RARRAY(endpoint)->ptr[0] = ID2SYM(rb_intern("e"));
-    RARRAY(endpoint)->ptr[1] = INT2FIX(l);
-    RARRAY(endpoint)->ptr[2] = INT2FIX(v1);
-    RARRAY(endpoint)->ptr[3] = INT2FIX(v2);
+    rb_ary_push(endpoint, ID2SYM(rb_intern("e")));
+    rb_ary_push(endpoint, INT2FIX(l));
+    rb_ary_push(endpoint, INT2FIX(v1));
+    rb_ary_push(endpoint, INT2FIX(v2));
 
     // Get the existing raw voronoi diagram
     eArray = rb_funcall(*(VALUE *)rubyvorState.decomp, rb_intern("voronoi_diagram_raw"), 0);
 
     // Add the new endpoint to it
-    rb_ary_push(eArray, endpoint);    
+    rb_ary_push(eArray, endpoint);
 }
 
 
@@ -240,16 +243,15 @@ storeVertex(const float a, const float b)
     
     // Create a new vertex from the coordinates
     vertex = rb_ary_new2(3);
-    RARRAY(vertex)->len = 3;
-    RARRAY(vertex)->ptr[0] = ID2SYM(rb_intern("v"));
-    RARRAY(vertex)->ptr[1] = rb_float_new(a);
-    RARRAY(vertex)->ptr[2] = rb_float_new(b);
+    rb_ary_push(vertex, ID2SYM(rb_intern("v")));
+    rb_ary_push(vertex, rb_float_new(a));
+    rb_ary_push(vertex, rb_float_new(b));
 
     // Get the existing raw voronoi diagram
     vArray = rb_funcall(*(VALUE *)rubyvorState.decomp, rb_intern("voronoi_diagram_raw"), 0);
 
     // Add the new vertex to it
-    rb_ary_push(vArray, vertex);    
+    rb_ary_push(vArray, vertex);
 }
 
 
@@ -264,14 +266,13 @@ storeSite(const float x, const float y)
     
     // Create a new site from the coordinates
     site = rb_ary_new2(3);
-    RARRAY(site)->len = 3;
-    RARRAY(site)->ptr[0] = ID2SYM(rb_intern("s"));
-    RARRAY(site)->ptr[1] = rb_float_new(x);
-    RARRAY(site)->ptr[2] = rb_float_new(y);
+    rb_ary_push(site, ID2SYM(rb_intern("s")));
+    rb_ary_push(site, rb_float_new(x));
+    rb_ary_push(site, rb_float_new(y));
 
     // Get the existing raw voronoi diagram
     sArray = rb_funcall(*(VALUE *)rubyvorState.decomp, rb_intern("voronoi_diagram_raw"), 0);
 
     // Add the new site to it
-    rb_ary_push(sArray, site);    
+    rb_ary_push(sArray, site);
 }

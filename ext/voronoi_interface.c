@@ -52,7 +52,7 @@ from_points(VALUE self, VALUE pointsArray)
     for (rit = 0; rit < repeat; rit++) {
 
     // Require T_ARRAY
-    Check_Type(pointsArray, T_ARRAY);
+    //Check_Type(pointsArray, T_ARRAY);
 
     // Intern our point access methods
     x = rb_intern("x");
@@ -72,14 +72,13 @@ from_points(VALUE self, VALUE pointsArray)
 
     
     // Initialize rubyvorState
-    initialize_state(0/* debug? */);
+    initialize_state(/* debug? */ 0);
+    debug_memory();
     
     // Create our return object.
     newDecomp = rb_funcall(self, rb_intern("new"), 0);
     // Store it in rubyvorState so we can populate its values.
     rubyvorState.decomp = (void *) &newDecomp;
-
-
     //
     // Read in the sites, sort, and compute xmin, xmax, ymin, ymax
     //
@@ -127,20 +126,25 @@ from_points(VALUE self, VALUE pointsArray)
         rubyvorState.ymin = rubyvorState.sites[0].coord.y;
         rubyvorState.ymax = rubyvorState.sites[rubyvorState.nsites-1].coord.y;
         
-    }    
+    }
 
     
     // Perform the computation
     voronoi(nextone);
+    debug_memory();
+    
+    // Get rid of our decomp reference
+    rubyvorState.decomp = (void *)NULL;
     
     // Free our allocated objects
-    free_all();
+    free_all();    
+    debug_memory();
 
     if (rubyvorState.debug)
-        fprintf(stderr,"FINISHED ITERATION %i\n", repeat + 1);
+        fprintf(stderr,"FINISHED ITERATION %i\n", rit + 1);
 
     
-    }
+    } // end repeat...
     
     return newDecomp;
 }
