@@ -8,6 +8,9 @@
 
 VoronoiState rubyvorState;
 
+/*
+ * RDOC DOC DE DOC
+ */
 static VALUE rb_mRubyVor;
 static VALUE rb_mVDDT;
 static VALUE rb_cComputation;
@@ -24,12 +27,26 @@ static int scomp(const void *, const void *);
 void
 Init_voronoi_interface(void)
 {
+    //
     // Set up our Modules and Class.
+    //
+
+    /*
+     * TODO: DOC DOC DE DOC
+     */
     rb_mRubyVor       = rb_define_module("RubyVor");
+    /*
+     * Voronoi Digram and Delaunay Triangulation namespace.
+     */
     rb_mVDDT          = rb_define_module_under(rb_mRubyVor, "VDDT");
+    /*
+     * Represents a VD/DT computation based on a set of 2-dimensional points
+     */
     rb_cComputation   = rb_define_class_under(rb_mVDDT, "Computation", rb_cObject);
 
+    //
     // Add methods.
+    //
     rb_define_singleton_method(rb_cComputation, "from_points", from_points, 1);
 }
 
@@ -37,6 +54,14 @@ Init_voronoi_interface(void)
 //
 // Class methods
 //
+
+
+/*
+ * Compute the voronoi diagram and delaunay triangulation from a set of points.
+ *
+ * This implementation uses Steven Fortune's sweepline algorithm, which runs in O(n log n) time and O(n) space.
+ * It is limited to 2-dimensional space, therefore it expects to receive an array of objects that respond to 'x' and 'y' methods.
+ */
 static VALUE
 from_points(VALUE self, VALUE pointsArray)
 {
@@ -150,11 +175,16 @@ from_points(VALUE self, VALUE pointsArray)
 }
 
 
+//
+// Instance methods (none)
+//
+
 
 
 //
-// Static C methods
+// Static C helper methods
 //
+
 
 /*** sort sites on y, then x, coord ***/
 static int
