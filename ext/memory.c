@@ -1,8 +1,9 @@
 
 /*** MEMORY.C ***/
 
+#include <ruby.h>
 #include <stdio.h>
-#include <stdlib.h>  /* malloc(), exit() */
+#include <stdlib.h>  /* malloc() */
 
 #include "vdefs.h"
 
@@ -61,17 +62,15 @@ update_memory_map(char * newp)
 char *
 myalloc(unsigned n)
 {
-    char * t ;
+    char * t;
+    
     if ((t=(char*)malloc(n)) == (char *) 0)
-    {
-        fprintf(stderr,"Insufficient memory processing site %d (%d bytes in use)\n",
-                rubyvorState.siteidx, total_alloc) ;
-        exit(0) ;
-    }
-    total_alloc += n ;
+        rb_raise(rb_eNoMemError, "Insufficient memory processing site %d (%d bytes in use)\n", rubyvorState.siteidx, total_alloc);
+
+    total_alloc += n;
     
     update_memory_map(t);
-    return (t) ;
+    return (t);
 }
 
 char *
@@ -81,24 +80,25 @@ myrealloc(void * oldp, unsigned n, unsigned oldn)
     int i;
     
     if ((newp=(char*)realloc(oldp, n)) == (char *) 0)
-    {
-        fprintf(stderr,"Insufficient memory processing site %d (%d bytes in use)\n",
-                rubyvorState.siteidx, total_alloc) ;
-        exit(0) ;
-    }
+        rb_raise(rb_eNoMemError, "Insufficient memory processing site %d (%d bytes in use)\n", rubyvorState.siteidx, total_alloc);
 
-    total_alloc += (n - oldn) ;
+    total_alloc += (n - oldn);
 
     update_memory_map(newp);
 
     // Mark oldp as freed, since free() was called by realloc.
-    for (i=0; i<nallocs; i++) {
-        if (memory_map[i] != (char*)0 && memory_map[i] == oldp) {
+    //
+    // TODO: this seems naive; measure if this is a bottleneck & use a hash table or some other scheme if it is.
+    for (i=0; i<nallocs; i++)
+    {
+        if (memory_map[i] != (char*)0 && memory_map[i] == oldp)
+        {
             memory_map[i] = (char*)0;
             break;
         }
     }
-    return (newp) ;
+    
+    return (newp);
 }
     
 
