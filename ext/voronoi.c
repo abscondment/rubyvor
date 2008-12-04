@@ -182,7 +182,7 @@ storeTriangulationTriplet(const int a, const int b, const int c)
     rb_ary_push(triplet, INT2FIX(c));
 
     // Get the existing raw triangulation
-    trArray = rb_funcall(*(VALUE *)rubyvorState.decomp, rb_intern("delaunay_triangulation_raw"), 0);
+    trArray = rb_funcall(*(VALUE *)rubyvorState.comp, rb_intern("delaunay_triangulation_raw"), 0);
 
     // Add the new triplet to it
     rb_ary_push(trArray, triplet);
@@ -203,7 +203,7 @@ storeLine(const float a, const float b, const float c)
     rb_ary_push(line, rb_float_new(c));
 
     // Get the existing raw voronoi diagram
-    lArray = rb_funcall(*(VALUE *)rubyvorState.decomp, rb_intern("voronoi_diagram_raw"), 0);
+    lArray = rb_funcall(*(VALUE *)rubyvorState.comp, rb_intern("voronoi_diagram_raw"), 0);
 
     // Add the new line to it
     rb_ary_push(lArray, line);
@@ -228,7 +228,7 @@ storeEndpoint(const int l, const int v1, const int v2)
     rb_ary_push(endpoint, INT2FIX(v2));
 
     // Get the existing raw voronoi diagram
-    eArray = rb_funcall(*(VALUE *)rubyvorState.decomp, rb_intern("voronoi_diagram_raw"), 0);
+    eArray = rb_funcall(*(VALUE *)rubyvorState.comp, rb_intern("voronoi_diagram_raw"), 0);
 
     // Add the new endpoint to it
     rb_ary_push(eArray, endpoint);
@@ -248,7 +248,7 @@ storeVertex(const float a, const float b)
     rb_ary_push(vertex, rb_float_new(b));
 
     // Get the existing raw voronoi diagram
-    vArray = rb_funcall(*(VALUE *)rubyvorState.decomp, rb_intern("voronoi_diagram_raw"), 0);
+    vArray = rb_funcall(*(VALUE *)rubyvorState.comp, rb_intern("voronoi_diagram_raw"), 0);
 
     // Add the new vertex to it
     rb_ary_push(vArray, vertex);
@@ -271,7 +271,7 @@ storeSite(const float x, const float y)
     rb_ary_push(site, rb_float_new(y));
 
     // Get the existing raw voronoi diagram
-    sArray = rb_funcall(*(VALUE *)rubyvorState.decomp, rb_intern("voronoi_diagram_raw"), 0);
+    sArray = rb_funcall(*(VALUE *)rubyvorState.comp, rb_intern("voronoi_diagram_raw"), 0);
 
     // Add the new site to it
     rb_ary_push(sArray, site);

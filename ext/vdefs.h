@@ -64,7 +64,7 @@ typedef struct tagVoronoiState
     int sorted, plot, debug, siteidx;
     float xmin, xmax, ymin, ymax;
     Site * sites;
-    void * decomp;
+    void * comp;
     void (* storeT)(int, int, int);
     void (* storeL)(float, float, float);
     void (* storeE)(int, int, int);

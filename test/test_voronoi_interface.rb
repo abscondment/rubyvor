@@ -12,14 +12,14 @@ class TestVoronoiInterface < MiniTest::Unit::TestCase
   end
   
   def test_diagram_correct
-    # Perform the decomposition.
-    decomp = RubyVor::VDDT::Decomposition.from_points(sample_points)
+    # Perform the computation.
+    comp = RubyVor::VDDT::Computation.from_points(sample_points)
 
     # Test each raw entry against three basic assertions:
     #  * entry lengths must match
     #  * entry types must match
     #  * entry values must match, with allowance for rounding errors (i.e. within a very small delta)
-    decomp.voronoi_diagram_raw.each_with_index do |computed_entry, i|
+    comp.voronoi_diagram_raw.each_with_index do |computed_entry, i|
       sample_entry = example_diagram_raw[i]
 
       
@@ -36,13 +36,13 @@ class TestVoronoiInterface < MiniTest::Unit::TestCase
   
 
   def test_triangulation_correct
-    # Perform the decomposition.
-    decomp = RubyVor::VDDT::Decomposition.from_points(sample_points)
+    # Perform the computation.
+    comp = RubyVor::VDDT::Computation.from_points(sample_points)
 
     # One assertion:
     #  * raw triangulation must match exactly.
     
-    assert_equal example_triangulation_raw, decomp.delaunay_triangulation_raw
+    assert_equal example_triangulation_raw, comp.delaunay_triangulation_raw
   end
   
 

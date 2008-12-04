@@ -10,7 +10,7 @@ VoronoiState rubyvorState;
 
 static VALUE rb_mRubyVor;
 static VALUE rb_mVDDT;
-static VALUE rb_cDecomposition;
+static VALUE rb_cComputation;
 static int repeat, rit;
 
 // Static method definitions
@@ -27,10 +27,10 @@ Init_voronoi_interface(void)
     // Set up our Modules and Class.
     rb_mRubyVor       = rb_define_module("RubyVor");
     rb_mVDDT          = rb_define_module_under(rb_mRubyVor, "VDDT");
-    rb_cDecomposition = rb_define_class_under(rb_mVDDT, "Decomposition", rb_cObject);
+    rb_cComputation   = rb_define_class_under(rb_mVDDT, "Computation", rb_cObject);
 
     // Add methods.
-    rb_define_singleton_method(rb_cDecomposition, "from_points", from_points, 1);
+    rb_define_singleton_method(rb_cComputation, "from_points", from_points, 1);
 }
 
 
@@ -41,7 +41,7 @@ static VALUE
 from_points(VALUE self, VALUE pointsArray)
 {
     //VALUE returnValue;
-    VALUE * inPtr, newDecomp;
+    VALUE * inPtr, newComp;
     ID x, y;
 
     long i, inSize;
@@ -76,9 +76,9 @@ from_points(VALUE self, VALUE pointsArray)
     debug_memory();
     
     // Create our return object.
-    newDecomp = rb_funcall(self, rb_intern("new"), 0);
+    newComp = rb_funcall(self, rb_intern("new"), 1, pointsArray);
     // Store it in rubyvorState so we can populate its values.
-    rubyvorState.decomp = (void *) &newDecomp;
+    rubyvorState.comp = (void *) &newComp;
     //
     // Read in the sites, sort, and compute xmin, xmax, ymin, ymax
     //
@@ -133,8 +133,8 @@ from_points(VALUE self, VALUE pointsArray)
     voronoi(nextone);
     debug_memory();
     
-    // Get rid of our decomp reference
-    rubyvorState.decomp = (void *)NULL;
+    // Get rid of our comp reference
+    rubyvorState.comp = (void *)NULL;
     
     // Free our allocated objects
     free_all();    
@@ -146,7 +146,7 @@ from_points(VALUE self, VALUE pointsArray)
     
     } // end repeat...
     
-    return newDecomp;
+    return newComp;
 }
 
 
