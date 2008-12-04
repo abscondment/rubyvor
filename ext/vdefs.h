@@ -125,6 +125,7 @@ void freeinit(Freelist *, int) ;
 char *getfree(Freelist *) ;
 void makefree(Freenode *, Freelist *) ;
 char *myalloc(unsigned) ;
+char *myrealloc(void *, unsigned, unsigned);
 void free_all(void);
 
 /* output.c */

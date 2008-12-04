@@ -19,9 +19,8 @@ static int repeat, rit;
 // Static method definitions
 static VALUE from_points(VALUE, VALUE);
 
-static Site * readone(void), * nextone(void);
+static Site * nextone(void);
 static int scomp(const void *, const void *);
-
 
 
 void
@@ -227,21 +226,4 @@ nextone(void)
     {
         return ((Site *)NULL) ;
     }
-}
-
-
-/*** read one site ***/
-static Site *
-readone(void)
-{
-    Site * s ;
-
-    s = (Site *)getfree(&(rubyvorState.sfl)) ;
-    s->refcnt = 0 ;
-    s->sitenbr = rubyvorState.siteidx++ ;
-    if (scanf("%f %f", &(s->coord.x), &(s->coord.y)) == EOF)
-    {
-        return ((Site *)NULL ) ;
-    }
-    return (s) ;
 }
