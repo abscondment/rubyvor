@@ -56,7 +56,7 @@ voronoi(Site *(*nextsite)(void))
     
     PQinitialize() ;
     rubyvorState.bottomsite = (*nextsite)() ;
-    if (rubyvorState.debug) fprintf(stderr, "bnys ");
+    //if (rubyvorState.debug) fprintf(stderr, "bnys ");
     out_site(rubyvorState.bottomsite) ;
     ELinitialize() ;
     newsite = (*nextsite)() ;
@@ -64,7 +64,7 @@ voronoi(Site *(*nextsite)(void))
     while (1)
     {
         
-        if (rubyvorState.debug) fprintf(stderr, "%d ", c++);
+        //if (rubyvorState.debug) fprintf(stderr, "%d ", c++);
         
         if(!PQempty())
             newintstar = PQ_min() ;
@@ -74,10 +74,10 @@ voronoi(Site *(*nextsite)(void))
             || (newsite->coord.y == newintstar.y
             && newsite->coord.x < newintstar.x)))
         {
-            if (rubyvorState.debug) fprintf(stderr, "nss ");
+            //if (rubyvorState.debug) fprintf(stderr, "nss ");
             /* new site is smallest */
             {
-                if (rubyvorState.debug) fprintf(stderr, "bnys ");
+                //if (rubyvorState.debug) fprintf(stderr, "bnys ");
                 out_site(newsite) ;
             }
             lbnd = ELleftbnd(&(newsite->coord)) ;
@@ -104,14 +104,14 @@ voronoi(Site *(*nextsite)(void))
         }
         else if (!PQempty())   /* intersection is smallest */
         {
-            if (rubyvorState.debug) fprintf(stderr, "!pqe ");
+            //if (rubyvorState.debug) fprintf(stderr, "!pqe ");
             lbnd = PQextractmin() ;
             llbnd = ELleft(lbnd) ;
             rbnd = ELright(lbnd) ;
             rrbnd = ELright(rbnd) ;
             bot = leftreg(lbnd) ;
             top = rightreg(rbnd) ;
-            if (rubyvorState.debug) fprintf(stderr, "bnyt ");
+            //if (rubyvorState.debug) fprintf(stderr, "bnyt ");
             out_triple(bot, top, rightreg(lbnd)) ;
             v = lbnd->vertex ;
             makevertex(v) ;
@@ -156,7 +156,7 @@ voronoi(Site *(*nextsite)(void))
          lbnd = ELright(lbnd))
     {
         e = lbnd->ELedge ;
-        if (rubyvorState.debug) fprintf(stderr, "bnye ");
+        //if (rubyvorState.debug) fprintf(stderr, "bnye ");
         out_ep(e) ;
     }
 }
@@ -168,15 +168,15 @@ voronoi(Site *(*nextsite)(void))
 // Static storage methods
 //
 
-
 /*** stores a triplet of point indices that comprise a Delaunay triangle ***/
 static void
 storeTriangulationTriplet(const int a, const int b, const int c)
 {
     VALUE trArray, triplet;
-
+    
     // Create a new triplet from the three incoming points
     triplet = rb_ary_new2(3);
+    
     rb_ary_push(triplet, INT2FIX(a));
     rb_ary_push(triplet, INT2FIX(b));
     rb_ary_push(triplet, INT2FIX(c));

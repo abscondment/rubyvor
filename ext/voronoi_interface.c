@@ -17,11 +17,12 @@ static VALUE rb_cComputation;
 static int repeat, rit;
 
 // Static method definitions
+
 static VALUE from_points(VALUE, VALUE);
+static VALUE nn_graph(VALUE);
 
 static Site * nextone(void);
 static int scomp(const void *, const void *);
-
 
 void
 Init_voronoi_interface(void)
@@ -47,6 +48,7 @@ Init_voronoi_interface(void)
     // Add methods.
     //
     rb_define_singleton_method(rb_cComputation, "from_points", from_points, 1);
+    rb_define_method(rb_cComputation, "nn_graph", nn_graph, 0);
 }
 
 
@@ -166,9 +168,10 @@ from_points(VALUE self, VALUE pointsArray)
 
     if (rubyvorState.debug)
         fprintf(stderr,"FINISHED ITERATION %i\n", rit + 1);
-
     
     } // end repeat...
+
+    
     
     return newComp;
 }
@@ -177,6 +180,50 @@ from_points(VALUE self, VALUE pointsArray)
 //
 // Instance methods (none)
 //
+
+static VALUE
+nn_graph(VALUE self)
+{
+    long i;
+    VALUE dtRaw, graph, points, * dtPtr, * tripletPtr, * graphPtr;
+    ID has_key;
+    graph = rb_iv_get(self, "@nn_graph");
+    
+    if (RTEST(graph))
+        return graph;
+
+    // Create an array of same size as points for the graph
+    points = rb_iv_get(self, "@points");
+    graph = rb_ary_new2(RARRAY(points)->len);
+    for (i = 0; i < RARRAY(points)->len; i++)
+        rb_ary_push(graph, rb_ary_new());
+    
+    // Get our pointer into this array.
+    graphPtr = RARRAY(graph)->ptr;
+
+    // Iterate over the triangulation
+    dtRaw = rb_iv_get(self, "@delaunay_triangulation_raw");
+    dtPtr = RARRAY(dtRaw)->ptr;
+    for (i = 0; i < RARRAY(dtRaw)->len; i++) {
+        tripletPtr = RARRAY(dtPtr[i])->ptr;
+
+        rb_ary_push(graphPtr[FIX2INT(tripletPtr[0])], tripletPtr[1]);
+        rb_ary_push(graphPtr[FIX2INT(tripletPtr[1])], tripletPtr[0]);
+
+        rb_ary_push(graphPtr[FIX2INT(tripletPtr[0])], tripletPtr[2]);
+        rb_ary_push(graphPtr[FIX2INT(tripletPtr[2])], tripletPtr[0]);
+
+        rb_ary_push(graphPtr[FIX2INT(tripletPtr[1])], tripletPtr[2]);
+        rb_ary_push(graphPtr[FIX2INT(tripletPtr[2])], tripletPtr[1]);
+    }
+
+    for (i = 0; i < RARRAY(graph)->len; i++)
+        rb_funcall(graphPtr[i], rb_intern("uniq!"), 0);
+
+    rb_iv_set(self, "@nn_graph", graph);
+    
+    return graph;
+}
 
 
 

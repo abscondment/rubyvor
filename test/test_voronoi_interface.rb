@@ -2,14 +2,16 @@ require 'rubygems'
 require 'minitest/unit'
 require File.dirname(__FILE__) + '/../lib/ruby_vor'
 
+
 class TestVoronoiInterface < MiniTest::Unit::TestCase
 
-  MAX_DELTA = 0.000001
-  
   def initialize(*args)
     @points = @trianglulation_raw = @diagram_raw = nil
     super(*args)
   end
+
+  
+  MAX_DELTA = 0.000001
   
   def test_diagram_correct
     # Perform the computation.
@@ -44,7 +46,7 @@ class TestVoronoiInterface < MiniTest::Unit::TestCase
     
     assert_equal example_triangulation_raw, comp.delaunay_triangulation_raw
   end
-  
+
 
   
   #
@@ -153,6 +155,7 @@ class TestVoronoiInterface < MiniTest::Unit::TestCase
     end
     @trianglulation_raw
   end
+  
 end
 
 MiniTest::Unit.autorun
