@@ -1,13 +1,13 @@
 module RubyVor
   class PriorityQueue
 
-    attr_reader :data, :size, :comp
+    attr_reader :data, :size
     
-    def initialize(comp = lambda{|a,b| a < b})
-      @data = []
-      @size = 0
-      @comp = comp
-      reorder_queue()
+    def initialize(d=[])
+      @data = d || []
+      @size = d.length
+
+      heapify()
     end
 
     def peek
@@ -20,6 +20,7 @@ module RubyVor
       r = @data[0]
 
       @data[0] = @data[@size-1]
+      @data[0].index = 1
       @data.delete_at(@size-1)
 
       @size -= 1
@@ -29,52 +30,30 @@ module RubyVor
       return r
     end
 
-    def push(v)
+    def push(data, priority=Float::MAX)
       @size += 1
-      @data[@size - 1] = v
+      @data[@size - 1] = QueueItem.new(priority, @size - 1, data)
       percolate_up(@size)
     end
 
-    def reorder_queue
-      for i in 2..(@size) do
-        percolate_up(i)
-      end
-    end
+    # Implemented in C
+    def reorder_queue;end
 
     protected
 
-    def percolate_up(i)
-      j = i / 2
+    # Implemented in C
+    def percolate_up(i);end
 
-      item = @data[i-1]
+    # Implemented in C
+    def percolate_down(i);end
 
-      while j > 0 && @comp[item, @data[j-1]]
-        @data[i-1] = @data[j-1]
-        i = j
-        j = j / 2
+    class QueueItem
+      attr_accessor :priority, :index, :data
+      def initialize(p, i, d)
+        @priority = p
+        @index    = i
+        @data     = d
       end
-
-      @data[i-1] = item
-    end
-    
-    def percolate_down(i)
-      j = @size / 2
-      
-      item = @data[i-1]
-
-      until i > j  
-        k = i * 2
-        k += 1 if k < @size && @comp[@data[k], @data[k-1]]
-
-        if @comp[item, @data[k-1]]
-          j = -1
-        else
-          @data[i-1] = @data[k-1]
-          i = k
-        end
-      end
-
-      @data[i-1] = item
     end
     
   end

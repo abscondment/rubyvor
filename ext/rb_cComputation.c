@@ -1,59 +1,14 @@
 #include <ruby.h>
 #include <vdefs.h>
+#include <ruby_vor.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-
-
-
-VoronoiState rubyvorState;
-
-/*
- * RDOC DOC DE DOC
- */
-static VALUE rb_mRubyVor;
-static VALUE rb_mVDDT;
-static VALUE rb_cComputation;
-static int repeat, rit;
-
-// Static method definitions
-
-static VALUE from_points(VALUE, VALUE);
-static VALUE nn_graph(VALUE);
 
 static Site * nextone(void);
 static int scomp(const void *, const void *);
 
-void
-Init_voronoi_interface(void)
-{
-    //
-    // Set up our Modules and Class.
-    //
-
-    /*
-     * TODO: DOC DOC DE DOC
-     */
-    rb_mRubyVor       = rb_define_module("RubyVor");
-    /*
-     * Voronoi Digram and Delaunay Triangulation namespace.
-     */
-    rb_mVDDT          = rb_define_module_under(rb_mRubyVor, "VDDT");
-    /*
-     * Represents a VD/DT computation based on a set of 2-dimensional points
-     */
-    rb_cComputation   = rb_define_class_under(rb_mVDDT, "Computation", rb_cObject);
-
-    //
-    // Add methods.
-    //
-    rb_define_singleton_method(rb_cComputation, "from_points", from_points, 1);
-    rb_define_method(rb_cComputation, "nn_graph", nn_graph, 0);
-}
-
-
 //
-// Class methods
+// Class methods for RubyVor::VDDT::Computation
 //
 
 
@@ -63,7 +18,7 @@ Init_voronoi_interface(void)
  * This implementation uses Steven Fortune's sweepline algorithm, which runs in O(n log n) time and O(n) space.
  * It is limited to 2-dimensional space, therefore it expects to receive an array of objects that respond to 'x' and 'y' methods.
  */
-static VALUE
+VALUE
 from_points(VALUE self, VALUE pointsArray)
 {
     //VALUE returnValue;
@@ -72,13 +27,8 @@ from_points(VALUE self, VALUE pointsArray)
 
     long i, inSize;
 
-    // TODO: remove
-    repeat = 1;
-    
-    for (rit = 0; rit < repeat; rit++) {
-
     // Require T_ARRAY
-    //Check_Type(pointsArray, T_ARRAY);
+    Check_Type(pointsArray, T_ARRAY);
 
     // Intern our point access methods
     x = rb_intern("x");
@@ -166,13 +116,6 @@ from_points(VALUE self, VALUE pointsArray)
     free_all();    
     debug_memory();
 
-    if (rubyvorState.debug)
-        fprintf(stderr,"FINISHED ITERATION %i\n", rit + 1);
-    
-    } // end repeat...
-
-    
-    
     return newComp;
 }
 
@@ -181,7 +124,69 @@ from_points(VALUE self, VALUE pointsArray)
 // Instance methods (none)
 //
 
-static VALUE
+VALUE
+minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
+{
+    VALUE dist_proc, nodes, nnGraph, points, queue, tmpHash, tmpArray, adjList, latestAddition;
+    long i, j;
+
+    /* 0 mandatory, 1 optional */
+    rb_scan_args(argc, argv, "01", &dist_proc);
+
+    if (NIL_P(dist_proc)) {
+        // Use our default Proc
+        dist_proc = rb_eval_string("lambda{|a,b| a.distance_from(b)}");
+    } else if (rb_class_of(dist_proc) != rb_cProc) {
+        // Blow up if we have a non-nil, non-Proc
+        rb_raise(rb_eTypeError, "wrong argument type %s (expected %s)", rb_obj_classname(dist_proc), rb_class2name(rb_cProc));
+    }
+
+    points  = rb_iv_get(self, "@points");
+    nodes   = rb_ary_new2(RARRAY(points)->len);
+    queue   = rb_eval_string("RubyVor::PriorityQueue.new(lambda{|a,b| a[:min_distance] < b[:min_distance]})");
+    nnGraph = nn_graph(self);
+
+    for (i=0; i < RARRAY(points)->len; i++) {
+        tmpHash = rb_hash_new();
+
+        // :node => n,
+        rb_hash_aset(tmpHash, ID2SYM(rb_intern("node")), INT2FIX(i));
+        // :min_distance => (n == 0) ? 0.0 : Float::MAX,
+        rb_hash_aset(tmpHash, ID2SYM(rb_intern("min_distance")), (i == 0) ? INT2FIX(0) : rb_const_get(rb_cFloat, rb_intern("MAX")));
+        // :parent => nil,
+        rb_hash_aset(tmpHash, ID2SYM(rb_intern("parent")), Qnil);
+        // :adjacency_list => nn_graph[n].clone,
+        rb_hash_aset(tmpHash, ID2SYM(rb_intern("adjacency_list")), rb_funcall(RARRAY(nnGraph)->ptr[i], rb_intern("clone"), 0));
+        // :min_adjacency_list => [],
+        rb_hash_aset(tmpHash, ID2SYM(rb_intern("min_adjacency_list")), rb_ary_new());
+        // :in_q => true
+        rb_hash_aset(tmpHash, ID2SYM(rb_intern("in_q")), Qtrue);
+        
+        rb_funcall(queue, rb_intern("push"), 1, tmpHash);
+    }
+
+    tmpArray = rb_funcall(queue, rb_intern("data"), 0);
+    for (i = 0; i < RARRAY(tmpArray)->len; i++) {
+        tmpHash = RARRAY(tmpArray)->ptr[i];
+        adjList = rb_hash_aref(tmpHash, ID2SYM(rb_intern("adjacency_list")));
+        
+        for (j = 0; j < RARRAY(adjList)->len; j++)
+            rb_ary_store(adjList, j, RARRAY(tmpArray)->ptr[ FIX2INT(RARRAY(adjList)->ptr[j]) ]);
+    }
+
+    latestAddition = rb_funcall(queue, rb_intern("pop"), 0);
+    while (RTEST(latestAddition)) {
+        rb_hash_aset(latestAddition, ID2SYM(rb_intern("in_q")), Qfalse);
+
+        if (RTEST(rb_hash_aref(latestAddition, ID2SYM(rb_intern("parent"))))) {
+        }
+        break;
+    }
+    
+    return tmpArray;
+}
+
+VALUE
 nn_graph(VALUE self)
 {
     long i;

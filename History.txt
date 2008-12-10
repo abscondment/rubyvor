@@ -1,3 +1,8 @@
+=== 0.0.5 / 2008-12-10
+
+* Beginnings of clustering and useful graph algorithms.
+* Some refactoring of C methods.
+
 === 0.0.4 / 2008-12-04
 
 * Fixed 64-bit segfaults due to improper definition of the myrealloc() function.

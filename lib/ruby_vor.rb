@@ -6,8 +6,8 @@ require 'ruby_vor/point'
 require 'ruby_vor/priority_queue'
 require 'ruby_vor/computation'
 
-# Require voronoi_interface.so last to clobber old from_points
-require 'voronoi_interface.so'
+# Require ruby_vor.so last to clobber old from_points
+require 'ruby_vor.so'
 
 # DOC HERE
 module RubyVor

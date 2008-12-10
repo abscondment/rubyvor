@@ -39,7 +39,26 @@ class TestComputation < MiniTest::Unit::TestCase
                  expected_graph.map{|v| v.sort}.sort
   end
 
-  def test_mst
+  def test_simple_mst
+    points = [
+              RubyVor::Point.new(0,0),
+              RubyVor::Point.new(1.0,1.1),
+              RubyVor::Point.new(4.9,3.1),
+             ]
+
+    comp = RubyVor::VDDT::Computation.from_points(points)
+
+    expected_mst = [
+                    [1],
+                    [0,2],
+                    [1]
+                   ]
+
+    assert_equal expected_mst.map{|v| v.sort}.sort, \
+                 comp.minimum_spanning_tree.map{|v| v.sort}.sort
+  end
+  
+  def test_advanced_mst
     # Test tree taken from an example SVG included in the Wikipedia article on Euclidean minimum spanning trees:
     # http://en.wikipedia.org/wiki/Image:Euclidean_minimum_spanning_tree.svg
     

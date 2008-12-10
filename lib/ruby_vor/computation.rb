@@ -61,52 +61,49 @@ module RubyVor
       # For points on a Euclidean plane, the MST is always comprised of a subset of the edges in a Delaunay triangulation. This makes computation of the tree very efficient: simply compute the Delaunay triangulation, and then run Prim's algorithm on the resulting edges.
       def minimum_spanning_tree(dist_proc=lambda{|a,b| a.distance_from(b)})
         nodes = []
-        q = RubyVor::PriorityQueue.new(lambda{|a,b| a[:min_distance] < b[:min_distance]})
+        q = RubyVor::PriorityQueue.new
         (0..points.length-1).to_a.map do |n|
           q.push({
             :node => n,
-            :min_distance => (n == 0) ? 0.0 : Float::MAX,
             :parent => nil,
             :adjacency_list => nn_graph[n].clone,
             :min_adjacency_list => [],
             :in_q => true
-          })
+          }, (n == 0) ? 0.0 : Float::MAX)
         end
-
         
         q.data.each do |n|
-          n[:adjacency_list].map!{|v| q.data[v]}
+          n.data[:adjacency_list].map!{|v| q.data[v]}
           nodes.push(n)
         end
 
-        while latest_addition = q.pop
-          
-          latest_addition[:in_q] = false
+        while latest_addition = q.pop          
+          latest_addition.data[:in_q] = false
 
-          if latest_addition[:parent]
-            latest_addition[:parent][:min_adjacency_list].push(latest_addition)
-            latest_addition[:min_adjacency_list].push(latest_addition[:parent])
+          if latest_addition.data[:parent]
+            latest_addition.data[:parent].data[:min_adjacency_list].push(latest_addition)
+            latest_addition.data[:min_adjacency_list].push(latest_addition.data[:parent])
           end
 
-          latest_addition[:adjacency_list].each do |adjacent|
+          latest_addition.data[:adjacency_list].each do |adjacent|
             
-            if adjacent[:in_q]
+            if adjacent.data[:in_q]
 
-              adjacent_distance = dist_proc[ points[latest_addition[:node]], points[adjacent[:node]] ]
+              adjacent_distance = dist_proc[ points[latest_addition.data[:node]], points[adjacent.data[:node]] ]
               
-              if adjacent_distance < adjacent[:min_distance]
-                adjacent[:parent] = latest_addition
-                adjacent[:min_distance] = adjacent_distance
-                
+              if adjacent_distance < adjacent.priority
+                adjacent.data[:parent] = latest_addition
+                adjacent.priority = adjacent_distance
+                q.percolate_up(adjacent.index)
               end
             end
           end
-          
-          q.reorder_queue()
+
         end
 
+
         nodes.map! do |n|
-          n[:min_adjacency_list].map!{|v| v[:node]}
+          n.data[:min_adjacency_list].map!{|v| v.data[:node]}
         end
       end
 

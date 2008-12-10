@@ -56,16 +56,12 @@ voronoi(Site *(*nextsite)(void))
     
     PQinitialize() ;
     rubyvorState.bottomsite = (*nextsite)() ;
-    //if (rubyvorState.debug) fprintf(stderr, "bnys ");
     out_site(rubyvorState.bottomsite) ;
     ELinitialize() ;
     newsite = (*nextsite)() ;
     
     while (1)
     {
-        
-        //if (rubyvorState.debug) fprintf(stderr, "%d ", c++);
-        
         if(!PQempty())
             newintstar = PQ_min() ;
         
@@ -74,10 +70,8 @@ voronoi(Site *(*nextsite)(void))
             || (newsite->coord.y == newintstar.y
             && newsite->coord.x < newintstar.x)))
         {
-            //if (rubyvorState.debug) fprintf(stderr, "nss ");
             /* new site is smallest */
             {
-                //if (rubyvorState.debug) fprintf(stderr, "bnys ");
                 out_site(newsite) ;
             }
             lbnd = ELleftbnd(&(newsite->coord)) ;
@@ -104,14 +98,12 @@ voronoi(Site *(*nextsite)(void))
         }
         else if (!PQempty())   /* intersection is smallest */
         {
-            //if (rubyvorState.debug) fprintf(stderr, "!pqe ");
             lbnd = PQextractmin() ;
             llbnd = ELleft(lbnd) ;
             rbnd = ELright(lbnd) ;
             rrbnd = ELright(rbnd) ;
             bot = leftreg(lbnd) ;
             top = rightreg(rbnd) ;
-            //if (rubyvorState.debug) fprintf(stderr, "bnyt ");
             out_triple(bot, top, rightreg(lbnd)) ;
             v = lbnd->vertex ;
             makevertex(v) ;
@@ -156,7 +148,6 @@ voronoi(Site *(*nextsite)(void))
          lbnd = ELright(lbnd))
     {
         e = lbnd->ELedge ;
-        //if (rubyvorState.debug) fprintf(stderr, "bnye ");
         out_ep(e) ;
     }
 }

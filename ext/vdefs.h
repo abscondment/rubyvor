@@ -145,6 +145,6 @@ void debug_memory(void);
 /* voronoi.c */
 void voronoi(Site *(*)()) ;
 void initialize_state(int);
-#endif  
+#endif
 
 

@@ -1,3 +1,3 @@
 require 'mkmf'
-dir_config('voronoi_interface')
-create_makefile('voronoi_interface')
+dir_config('ruby_vor')
+create_makefile('ruby_vor')

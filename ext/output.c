@@ -237,12 +237,14 @@ debug_memory(void)
     FILE* pf;
 
     unsigned size;//       total program size
+    /*
     unsigned resident;//   resident set size
     unsigned share;//      shared pages
     unsigned text;//       text (code)
     unsigned lib;//        library
     unsigned data;//       data/stack
     unsigned dt;//         dirty pages (unused in Linux 2.6)
+    */
     
     int retVal;
 
