@@ -11,7 +11,7 @@ VALUE rb_mVDDT;
 VALUE rb_cComputation;
 VALUE from_points(VALUE, VALUE);
 VALUE nn_graph(VALUE);
-VALUE minimum_spanning_tree(int, VALUE*, VALUE);
+// VALUE minimum_spanning_tree(int, VALUE*, VALUE);
 
 /* PriorityQueue */
 VALUE rb_cPriorityQueue;

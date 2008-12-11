@@ -8,16 +8,14 @@ static Site * nextone(void);
 static int scomp(const void *, const void *);
 
 //
-// Class methods for RubyVor::VDDT::Computation
+// See ruby_vor.c for RDOC
 //
 
 
-/*
- * Compute the voronoi diagram and delaunay triangulation from a set of points.
- *
- * This implementation uses Steven Fortune's sweepline algorithm, which runs in O(n log n) time and O(n) space.
- * It is limited to 2-dimensional space, therefore it expects to receive an array of objects that respond to 'x' and 'y' methods.
- */
+//
+// Class methods for RubyVor::VDDT::Computation
+//
+
 VALUE
 from_points(VALUE self, VALUE pointsArray)
 {
@@ -121,16 +119,17 @@ from_points(VALUE self, VALUE pointsArray)
 
 
 //
-// Instance methods (none)
+// Instance methods
 //
 
+/*
 VALUE
 minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
 {
     VALUE dist_proc, nodes, nnGraph, points, queue, tmpHash, tmpArray, adjList, latestAddition;
     long i, j;
 
-    /* 0 mandatory, 1 optional */
+    // 0 mandatory, 1 optional
     rb_scan_args(argc, argv, "01", &dist_proc);
 
     if (NIL_P(dist_proc)) {
@@ -185,6 +184,7 @@ minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
     
     return tmpArray;
 }
+*/
 
 VALUE
 nn_graph(VALUE self)
