@@ -17,7 +17,7 @@ static int scomp(const void *, const void *);
 //
 
 VALUE
-from_points(VALUE self, VALUE pointsArray)
+RubyVor_from_points(VALUE self, VALUE pointsArray)
 {
     //VALUE returnValue;
     VALUE * inPtr, newComp;
@@ -124,7 +124,7 @@ from_points(VALUE self, VALUE pointsArray)
 
 /*
 VALUE
-minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
+RubyVor_minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
 {
     VALUE dist_proc, nodes, nnGraph, points, queue, tmpHash, tmpArray, adjList, latestAddition;
     long i, j;
@@ -143,7 +143,7 @@ minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
     points  = rb_iv_get(self, "@points");
     nodes   = rb_ary_new2(RARRAY(points)->len);
     queue   = rb_eval_string("RubyVor::PriorityQueue.new(lambda{|a,b| a[:min_distance] < b[:min_distance]})");
-    nnGraph = nn_graph(self);
+    nnGraph = RubyVor_nn_graph(self);
 
     for (i=0; i < RARRAY(points)->len; i++) {
         tmpHash = rb_hash_new();
@@ -154,7 +154,7 @@ minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
         rb_hash_aset(tmpHash, ID2SYM(rb_intern("min_distance")), (i == 0) ? INT2FIX(0) : rb_const_get(rb_cFloat, rb_intern("MAX")));
         // :parent => nil,
         rb_hash_aset(tmpHash, ID2SYM(rb_intern("parent")), Qnil);
-        // :adjacency_list => nn_graph[n].clone,
+        // :adjacency_list => RubyVor_nn_graph[n].clone,
         rb_hash_aset(tmpHash, ID2SYM(rb_intern("adjacency_list")), rb_funcall(RARRAY(nnGraph)->ptr[i], rb_intern("clone"), 0));
         // :min_adjacency_list => [],
         rb_hash_aset(tmpHash, ID2SYM(rb_intern("min_adjacency_list")), rb_ary_new());
@@ -187,7 +187,7 @@ minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
 */
 
 VALUE
-nn_graph(VALUE self)
+RubyVor_nn_graph(VALUE self)
 {
     long i;
     VALUE dtRaw, graph, points, * dtPtr, * tripletPtr, * graphPtr;

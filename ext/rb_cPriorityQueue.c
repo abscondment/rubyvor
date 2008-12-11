@@ -7,28 +7,28 @@
 //
 
 
-VALUE
+static VALUE
 compare(VALUE a, VALUE b)
 {
     double aD, bD;
     ID minDistance;
     minDistance = ID2SYM(rb_intern("min_distance"));
 
-    if (rb_class_of(a) == rb_cQueueItem)
+    if (rb_class_of(a) == RubyVor_rb_cQueueItem)
         aD = NUM2DBL(rb_funcall(a, rb_intern("priority"), 0));
     else
-        rb_raise(rb_eTypeError, "wrong argument type %s (expected %s)", rb_obj_classname(a), rb_class2name(rb_cQueueItem));
+        rb_raise(rb_eTypeError, "wrong argument type %s (expected %s)", rb_obj_classname(a), rb_class2name(RubyVor_rb_cQueueItem));
     
-    if (rb_class_of(b) == rb_cQueueItem)
+    if (rb_class_of(b) == RubyVor_rb_cQueueItem)
         bD = NUM2DBL(rb_funcall(b, rb_intern("priority"), 0));
     else
-        rb_raise(rb_eTypeError, "wrong argument type %s (expected %s)", rb_obj_classname(b), rb_class2name(rb_cQueueItem));
+        rb_raise(rb_eTypeError, "wrong argument type %s (expected %s)", rb_obj_classname(b), rb_class2name(RubyVor_rb_cQueueItem));
     
     return RTEST(aD < bD);
 }
 
 VALUE
-percolate_up(VALUE self, VALUE index)
+RubyVor_percolate_up(VALUE self, VALUE index)
 {
     VALUE item, data;
     long i, j, size;
@@ -64,7 +64,7 @@ percolate_up(VALUE self, VALUE index)
 
 
 VALUE
-percolate_down(VALUE self, VALUE index)
+RubyVor_percolate_down(VALUE self, VALUE index)
 {
     VALUE item, data;
     long i, j, k, size;
@@ -108,13 +108,13 @@ percolate_down(VALUE self, VALUE index)
 
 
 VALUE
-heapify(VALUE self)
+RubyVor_heapify(VALUE self)
 {
     long i, size;
     size = FIX2INT(rb_iv_get(self, "@size"));
 
     for(i = size / 2; i >= 1; i--)
-        percolate_down(self, INT2FIX(i-1));
+        RubyVor_percolate_down(self, INT2FIX(i-1));
 
     return Qnil;
 }

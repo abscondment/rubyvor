@@ -4,24 +4,24 @@
 extern VoronoiState rubyvorState;
 
 /* Base modules */
-VALUE rb_mRubyVor;
-VALUE rb_mVDDT;
+VALUE RubyVor_rb_mRubyVor;
+VALUE RubyVor_rb_mVDDT;
 
 /* Computation */
-VALUE rb_cComputation;
-VALUE from_points(VALUE, VALUE);
-VALUE nn_graph(VALUE);
+VALUE RubyVor_rb_cComputation;
+VALUE RubyVor_from_points(VALUE, VALUE);
+VALUE RubyVor_nn_graph(VALUE);
 // VALUE minimum_spanning_tree(int, VALUE*, VALUE);
 
 /* PriorityQueue */
-VALUE rb_cPriorityQueue;
-VALUE rb_cQueueItem;
-VALUE percolate_up(VALUE, VALUE);
-VALUE percolate_down(VALUE, VALUE);
-VALUE heapify(VALUE);
+VALUE RubyVor_rb_cPriorityQueue;
+VALUE RubyVor_rb_cQueueItem;
+VALUE RubyVor_percolate_up(VALUE, VALUE);
+VALUE RubyVor_percolate_down(VALUE, VALUE);
+VALUE RubyVor_heapify(VALUE);
 
 /* Point */
-VALUE rb_cPoint;
-VALUE distance_from(VALUE, VALUE);
+VALUE RubyVor_rb_cPoint;
+VALUE RubyVor_distance_from(VALUE, VALUE);
 
 #endif
