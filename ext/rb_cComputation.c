@@ -191,7 +191,7 @@ nn_graph(VALUE self)
 {
     long i;
     VALUE dtRaw, graph, points, * dtPtr, * tripletPtr, * graphPtr;
-    ID has_key;
+
     graph = rb_iv_get(self, "@nn_graph");
     
     if (RTEST(graph))

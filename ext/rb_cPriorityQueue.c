@@ -2,6 +2,11 @@
 #include <vdefs.h>
 #include <ruby_vor.h>
 
+//
+// Instance methods for RubyVor::VDDT::PriorityQueue
+//
+
+
 VALUE
 compare(VALUE a, VALUE b)
 {
@@ -12,12 +17,12 @@ compare(VALUE a, VALUE b)
     if (rb_class_of(a) == rb_cQueueItem)
         aD = NUM2DBL(rb_funcall(a, rb_intern("priority"), 0));
     else
-        aD = NUM2DBL(a);
+        rb_raise(rb_eTypeError, "wrong argument type %s (expected %s)", rb_obj_classname(a), rb_class2name(rb_cQueueItem));
     
     if (rb_class_of(b) == rb_cQueueItem)
         bD = NUM2DBL(rb_funcall(b, rb_intern("priority"), 0));
     else
-        bD = NUM2DBL(b);
+        rb_raise(rb_eTypeError, "wrong argument type %s (expected %s)", rb_obj_classname(b), rb_class2name(rb_cQueueItem));
     
     return RTEST(aD < bD);
 }

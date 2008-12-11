@@ -53,9 +53,11 @@ class TestComputation < MiniTest::Unit::TestCase
                     [0,2],
                     [1]
                    ]
+    computed_mst = comp.minimum_spanning_tree
 
+    # Assert nodes are correct
     assert_equal expected_mst.map{|v| v.sort}.sort, \
-                 comp.minimum_spanning_tree.map{|v| v.sort}.sort
+                 computed_mst.map{|v| v.keys.sort}.sort
   end
   
   def test_advanced_mst
@@ -119,8 +121,10 @@ class TestComputation < MiniTest::Unit::TestCase
                     [22,24],   # 23
                     [23]       # 24
                    ]
+    computed_mst = comp.minimum_spanning_tree
+    
     assert_equal expected_mst.map{|v| v.sort}.sort, \
-                 comp.minimum_spanning_tree.map{|v| v.sort}.sort
+                 computed_mst.map{|v| v.keys.sort}.sort
   end
   
   def test_cluster_by_distance
@@ -144,6 +148,29 @@ class TestComputation < MiniTest::Unit::TestCase
     assert_equal original_nn_graph, \
                  comp.nn_graph
 
+  end
+
+  def test_bad_data
+    assert_raises TypeError do
+      comp = RubyVor::VDDT::Computation.from_points([RubyVor::Point.new(1,1), RubyVor::Point.new(21,3), RubyVor::Point.new(2,:s)])
+    end
+    
+    assert_raises TypeError do
+      comp = RubyVor::VDDT::Computation.from_points(RubyVor::Point.new(21,3))
+    end
+    
+    assert_raises RuntimeError do
+      comp = RubyVor::VDDT::Computation.from_points([RubyVor::Point.new(1,1), RubyVor::Point.new(21,3), nil])
+    end
+    
+    assert_raises RuntimeError do
+      comp = RubyVor::VDDT::Computation.from_points([])
+    end
+
+    comp = RubyVor::VDDT::Computation.from_points([RubyVor::Point.new(1,1), RubyVor::Point.new(21,3), RubyVor::Point.new(2,1.5)])
+    assert_raises ArgumentError do
+      cl = comp.cluster_by_distance(nil)
+    end
   end
 
   #

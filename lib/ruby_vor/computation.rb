@@ -63,37 +63,49 @@ module RubyVor
         nodes = []
         q = RubyVor::PriorityQueue.new
         (0..points.length-1).to_a.map do |n|
-          q.push({
-            :node => n,
-            :parent => nil,
-            :adjacency_list => nn_graph[n].clone,
-            :min_adjacency_list => [],
-            :in_q => true
-          }, (n == 0) ? 0.0 : Float::MAX)
-        end
-        
-        q.data.each do |n|
-          n.data[:adjacency_list].map!{|v| q.data[v]}
-          nodes.push(n)
+          q.push([
+                  n,                 #               :node == 0
+                  nil,               #             :parent == 1
+                  nn_graph[n].clone, #     :adjacency_list == 2
+                  [],                # :min_adjacency_list == 3
+                  true               #               :in_q == 4
+                 ],
+                 # Set min_distance of first node to 0, all others (effectively) to Infinity.
+                 (n == 0) ? 0.0 : Float::MAX)
         end
 
-        while latest_addition = q.pop          
-          latest_addition.data[:in_q] = false
+        # Adjacency list accces
+        nodes = q.data.clone
 
-          if latest_addition.data[:parent]
-            latest_addition.data[:parent].data[:min_adjacency_list].push(latest_addition)
-            latest_addition.data[:min_adjacency_list].push(latest_addition.data[:parent])
+        # We have now prepped to run through Prim's algorithm.
+        while latest_addition = q.pop
+          # check :in_q
+          latest_addition.data[4] = false
+
+          # check :parent
+          if latest_addition.data[1]
+            # push this node into :adjacency_list of :parent
+            latest_addition.data[1].data[3].push(latest_addition)
+            # push :parent into :adjacency_list of this node
+            latest_addition.data[3].push(latest_addition.data[1])
           end
 
-          latest_addition.data[:adjacency_list].each do |adjacent|
-            
-            if adjacent.data[:in_q]
+          latest_addition.data[2].each do |adjacent|
+            # grab indexed node
+            adjacent = nodes[adjacent]
 
-              adjacent_distance = dist_proc[ points[latest_addition.data[:node]], points[adjacent.data[:node]] ]
-              
+            # check :in_q -- only look at new nodes
+            if adjacent.data[4]
+              # compare points by :node -- adjacent against current
+              adjacent_distance = dist_proc[ points[latest_addition.data[0]], points[adjacent.data[0]] ]
+
+              # if the new distance is better than our current priorty, exchange them
               if adjacent_distance < adjacent.priority
-                adjacent.data[:parent] = latest_addition
+                # set new :parent
+                adjacent.data[1] = latest_addition
+                # update priority
                 adjacent.priority = adjacent_distance
+                # percolate up into correct position
                 q.percolate_up(adjacent.index)
               end
             end
@@ -103,7 +115,13 @@ module RubyVor
 
 
         nodes.map! do |n|
-          n.data[:min_adjacency_list].map!{|v| v.data[:node]}
+#          n.data[3].map! do |v|
+#            v.data[0] => v.priority
+#          end
+          n.data[3].inject({}) do |h,v|
+            h[v.data[0]] = v.priority
+            h
+          end
         end
       end
 

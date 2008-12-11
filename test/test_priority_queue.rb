@@ -9,7 +9,7 @@ class TestPriorityQueue < MiniTest::Unit::TestCase
     q = RubyVor::PriorityQueue.new
 
     items = [1,2,3,4,5,6,99,4,-20,101,5412,2,-1,-1,-1,33.0,0,55,7,12321,123.123,-123.123,0,0,0]
-    items.each{|i| q.push(i,i)}
+    items.each{|i| q.push(i)}
 
     items.sort!
     idx = 0
@@ -31,7 +31,7 @@ class TestPriorityQueue < MiniTest::Unit::TestCase
   def test_heapify
     q = RubyVor::PriorityQueue.new
 
-    ([10] * 10).each{|x| q.push(x,x)}
+    ([10] * 10).each{|x| q.push(x)}
 
     q.data[3] = RubyVor::PriorityQueue::QueueItem.new(-34, 3, -34)
     q.data[4] = RubyVor::PriorityQueue::QueueItem.new(1, 4, 1)
@@ -52,5 +52,36 @@ class TestPriorityQueue < MiniTest::Unit::TestCase
     assert_equal 10,  q.pop.data
     assert_equal 100, q.pop.data
   end
-  
+
+  def test_bad_data
+    q = RubyVor::PriorityQueue.new
+
+    10.times { q.push(rand * 100.0 - 50.0) }
+
+    old_data = q.data[1]
+    
+    q.data[1] = 45
+    assert_raises TypeError do
+      q.heapify()
+    end
+
+    q.data[1] = old_data
+    assert_nothing_raised do
+      q.heapify()
+    end
+    
+  end
+
+  private
+  def assert_nothing_raised(&b)
+    begin
+      yield
+    rescue Exception => e
+      flunk "#{mu_pp(e)} exception encountered, expected no exceptions"
+      return
+    end
+    pass()
+  end
 end
+
+MiniTest::Unit.autorun

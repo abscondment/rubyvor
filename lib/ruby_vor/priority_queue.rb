@@ -3,10 +3,9 @@ module RubyVor
 
     attr_reader :data, :size
     
-    def initialize(d=[])
-      @data = d || []
-      @size = d.length
-
+    def initialize()
+      @data = []
+      @size = 0
       heapify()
     end
 
@@ -30,7 +29,7 @@ module RubyVor
       return r
     end
 
-    def push(data, priority=Float::MAX)
+    def push(data, priority=data)
       @size += 1
       @data[@size - 1] = QueueItem.new(priority, @size - 1, data)
       percolate_up(@size)

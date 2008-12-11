@@ -1,24 +1,17 @@
 
 /*** OUTPUT.C ***/
 
-
+#include <vdefs.h>
 #include <stdio.h>
-
-#include "vdefs.h"
+#include <unistd.h>
 
 VoronoiState rubyvorState;
 
 static float pxmin, pxmax, pymin, pymax, cradius;
 
 void openpl(void) {}
-
-#pragma argsused
 void line(float ax, float ay, float bx, float by) {}
-
-#pragma argsused
 void circle(float ax, float ay, float radius) {}
-
-#pragma argsused
 void range(float pxmin, float pxmax, float pymin, float pymax) {}
 
 void
