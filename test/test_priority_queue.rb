@@ -31,48 +31,74 @@ class TestPriorityQueue < MiniTest::Unit::TestCase
   def test_heapify
     q = RubyVor::PriorityQueue.new
 
-    ([10] * 10).each{|x| q.push(x)}
+    # Create a randomized data set.
+    #
+    # Not ideal for unit tests, since they *should* be done
+    # on static data so that failure/success is deterministic...
+    # but works for me.
 
-    q.data[3] = RubyVor::PriorityQueue::QueueItem.new(-34, 3, -34)
-    q.data[4] = RubyVor::PriorityQueue::QueueItem.new(1, 4, 1)
-    q.data[5] = RubyVor::PriorityQueue::QueueItem.new(100, 5, 100)
-    q.data[7] = RubyVor::PriorityQueue::QueueItem.new(0.9, 7, 0.9)
-    q.data.sort!{|a,b| rand(3)-1}
-    
+    100.times{ q.push(rand * 10000.0 - 5000.0)}
+      
+    # Set things right.
     q.heapify()
 
-    assert_equal(-34, q.pop.data)
-    assert_equal 0.9, q.pop.data
-    assert_equal 1,   q.pop.data
-    assert_equal 10,  q.pop.data
-    assert_equal 10,  q.pop.data
-    assert_equal 10,  q.pop.data
-    assert_equal 10,  q.pop.data
-    assert_equal 10,  q.pop.data
-    assert_equal 10,  q.pop.data
-    assert_equal 100, q.pop.data
+    old_n = -1.0 * Float::MAX
+    while n = q.pop
+      assert n.priority >= old_n
+      old_n = n.priority
+    end
   end
 
   def test_bad_data
     q = RubyVor::PriorityQueue.new
-
     10.times { q.push(rand * 100.0 - 50.0) }
-
+  
+    #
+    # Heapify
+    #
     old_data = q.data[1]
-    
     q.data[1] = 45
     assert_raises TypeError do
       q.heapify()
     end
-
     q.data[1] = old_data
     assert_nothing_raised do
       q.heapify()
     end
     
+
+    #
+    # Percolation
+    #
+    [100, -100].each do |i|
+      assert_raises IndexError do
+        q.percolate_up(i)
+      end
+      assert_raises IndexError do
+        q.percolate_down(i)
+      end
+    end
+    [:x, Class, nil, false].each do |i|
+      assert_raises TypeError do
+        q.percolate_up(i)
+      end
+      assert_raises TypeError do
+        q.percolate_down(i)
+      end
+    end
+    [0,1,2,3].each do |i|
+      assert_nothing_raised do
+        q.percolate_up(i)
+      end
+      assert_nothing_raised do
+        q.percolate_down(i)
+      end
+    end
   end
 
+  
   private
+  
   def assert_nothing_raised(&b)
     begin
       yield

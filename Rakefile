@@ -7,8 +7,7 @@ require './lib/ruby_vor/version.rb'
 EXT = "ext/voronoi_interface.#{Hoe::DLEXT}"
 
 Hoe.new('rubyvor', RubyVor::VERSION) do |p|
-  p.developer('Brendan Ribera', 'brendan.ribera+rubyvor@gmail.com')
-  
+  p.developer('Brendan Ribera', 'brendan.ribera+rubyvor@gmail.com')  
   p.url = 'http://github.com/bribera/rubyvor'
 
   # C extension goodness

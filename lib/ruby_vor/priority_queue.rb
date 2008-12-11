@@ -19,12 +19,12 @@ module RubyVor
       r = @data[0]
 
       @data[0] = @data[@size-1]
-      @data[0].index = 1
+      @data[0].index = 0
       @data.delete_at(@size-1)
 
       @size -= 1
       
-      percolate_down(1) if @size > 0
+      percolate_down(0) if @size > 0
 
       return r
     end
@@ -32,7 +32,7 @@ module RubyVor
     def push(data, priority=data)
       @size += 1
       @data[@size - 1] = QueueItem.new(priority, @size - 1, data)
-      percolate_up(@size)
+      percolate_up(@size - 1)
     end
 
     # Implemented in C

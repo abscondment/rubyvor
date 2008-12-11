@@ -31,13 +31,18 @@ VALUE
 percolate_up(VALUE self, VALUE index)
 {
     VALUE item, data;
-    long i, j;
+    long i, j, size;
+
+    Check_Type(index, T_FIXNUM);
     
     data = rb_iv_get(self, "@data");
     Check_Type(data, T_ARRAY);
     
-    i = FIX2INT(index);
+    size = FIX2INT(rb_iv_get(self, "@size"));
+    i = FIX2INT(index) + 1;
 
+    if (i < 1 || i > size)
+        rb_raise(rb_eIndexError, "index %i out of range", i-1);
     
     j = i / 2;
     
@@ -46,13 +51,13 @@ percolate_up(VALUE self, VALUE index)
     while(j > 0 && compare(item, RARRAY(data)->ptr[j - 1]))
     {
         rb_ary_store(data, i-1, RARRAY(data)->ptr[j - 1]);
-        rb_funcall(RARRAY(data)->ptr[i-1], rb_intern("index="), 1, INT2FIX(i));
+        rb_funcall(RARRAY(data)->ptr[i-1], rb_intern("index="), 1, INT2FIX(i-1));
         i = j;
         j = j / 2;
     }
 
     rb_ary_store(data, i-1, item);
-    rb_funcall(RARRAY(data)->ptr[i-1], rb_intern("index="), 1, INT2FIX(i));
+    rb_funcall(RARRAY(data)->ptr[i-1], rb_intern("index="), 1, INT2FIX(i-1));
     
     return Qnil;
 }
@@ -64,12 +69,16 @@ percolate_down(VALUE self, VALUE index)
     VALUE item, data;
     long i, j, k, size;
 
+    Check_Type(index, T_FIXNUM);
+
     data = rb_iv_get(self, "@data");
     Check_Type(data, T_ARRAY);
     
     size = FIX2INT(rb_iv_get(self, "@size"));
-    i = FIX2INT(index);
+    i = FIX2INT(index) + 1;
     
+    if (i < 1 || i > size)
+        rb_raise(rb_eIndexError, "index %i out of range", i-1);
     
     j = size / 2;
 
@@ -86,13 +95,13 @@ percolate_down(VALUE self, VALUE index)
         else
         {
             rb_ary_store(data, i-1, RARRAY(data)->ptr[k - 1]);
-            rb_funcall(RARRAY(data)->ptr[i-1], rb_intern("index="), 1, INT2FIX(i));
+            rb_funcall(RARRAY(data)->ptr[i-1], rb_intern("index="), 1, INT2FIX(i-1));
             i = k;
         }
     }
 
     rb_ary_store(data, i-1, item);
-    rb_funcall(RARRAY(data)->ptr[i-1], rb_intern("index="), 1, INT2FIX(i));
+    rb_funcall(RARRAY(data)->ptr[i-1], rb_intern("index="), 1, INT2FIX(i-1));
     
     return Qnil;
 }
@@ -105,7 +114,7 @@ heapify(VALUE self)
     size = FIX2INT(rb_iv_get(self, "@size"));
 
     for(i = size / 2; i >= 1; i--)
-        percolate_down(self, INT2FIX(i));
+        percolate_down(self, INT2FIX(i-1));
 
     return Qnil;
 }
