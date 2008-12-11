@@ -115,9 +115,6 @@ module RubyVor
 
 
         nodes.map! do |n|
-#          n.data[3].map! do |v|
-#            v.data[0] => v.priority
-#          end
           n.data[3].inject({}) do |h,v|
             h[v.data[0]] = v.priority
             h
@@ -127,9 +124,10 @@ module RubyVor
 
       def cluster_by_size(sizes=[])
         # TODO
-        # * Create a minimum_spanning_tree routine to:
-        #   1. compute weights (should be done for us in C?)
-        #   2. Use Prim's algorithm for computation
+        # *    (DONE) Create a minimum_spanning_tree routine to:
+        #   1. (DONE) compute weights (should be done for us in C?)
+        #   2. (DONE) Use Prim's algorithm for computation
+        #
         # * Take MST, and
         #   1. For n in sizes (taken in descending order), delete the n most expensive edges from MST
         #     * use a MaxHeap?
