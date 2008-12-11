@@ -10,12 +10,12 @@ ext/heap.c
 ext/memory.c
 ext/output.c
 ext/rb_cComputation.c
+ext/rb_cPoint.c
 ext/rb_cPriorityQueue.c
 ext/ruby_vor.c
 ext/ruby_vor.h
 ext/vdefs.h
 ext/voronoi.c
-ext/voronoi_interface.c
 lib/ruby_vor.rb
 lib/ruby_vor/computation.rb
 lib/ruby_vor/point.rb

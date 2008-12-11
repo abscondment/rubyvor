@@ -20,4 +20,8 @@ VALUE percolate_up(VALUE, VALUE);
 VALUE percolate_down(VALUE, VALUE);
 VALUE heapify(VALUE);
 
+/* Point */
+VALUE rb_cPoint;
+VALUE distance_from(VALUE, VALUE);
+
 #endif

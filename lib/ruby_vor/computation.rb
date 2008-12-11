@@ -20,15 +20,14 @@ module RubyVor
 
         clusters = []
         nodes    = (0..points.length-1).to_a
-        visited  = []
-        
+        visited  = [false] * points.length
+        graph    = []
         v = 0
-        graph = nn_graph.map do |neighbors|
-          neighbors = neighbors.reject do |neighbor|
-            dist_proc[points[v], points[neighbor]] > max_distance            
+        
+        nn_graph.each_with_index do |neighbors,v|
+          graph[v] = neighbors.select do |neighbor|
+            dist_proc[points[v], points[neighbor]] < max_distance
           end
-          v += 1
-          neighbors
         end
         
         until nodes.empty?

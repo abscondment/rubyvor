@@ -38,4 +38,11 @@ Init_ruby_vor(void)
     rb_define_method(rb_cPriorityQueue, "percolate_up", percolate_up, 1);
     rb_define_method(rb_cPriorityQueue, "percolate_down", percolate_down, 1);
     rb_define_method(rb_cPriorityQueue, "heapify", heapify, 0);
+
+
+    /*
+     * A simple Point class
+     */
+    rb_cPoint = rb_define_class_under(rb_mRubyVor, "Point", rb_cObject);
+    rb_define_method(rb_cPoint, "distance_from", distance_from, 1);
 }
