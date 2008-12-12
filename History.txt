@@ -1,3 +1,9 @@
+=== 0.0.7 / 2008-12-12
+
+* Bugfix: there are cases where performing a Delaunay triangulation on a set of points will not yield a complete nearest neighbor graph. This causes computation of the minimum spanning tree and clustering to fail for these nodes (they always appear as disconnected from the main graph).
+
+* To fix this, the nn_graph function now treats any point that is excluded from Delaunay triangulation as having *all* other points as nearest neighbors. This is a naive approach, but is a good fix while a more efficient solution is considered.
+
 === 0.0.6 / 2008-12-11
 
 * Implementation of cluster_by_size to partition points into N clusters.

@@ -189,7 +189,7 @@ RubyVor_minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
 VALUE
 RubyVor_nn_graph(VALUE self)
 {
-    long i;
+    long i, j;
     VALUE dtRaw, graph, points, * dtPtr, * tripletPtr, * graphPtr;
 
     graph = rb_iv_get(self, "@nn_graph");
@@ -222,8 +222,20 @@ RubyVor_nn_graph(VALUE self)
         rb_ary_push(graphPtr[FIX2INT(tripletPtr[2])], tripletPtr[1]);
     }
 
-    for (i = 0; i < RARRAY(graph)->len; i++)
-        rb_funcall(graphPtr[i], rb_intern("uniq!"), 0);
+    for (i = 0; i < RARRAY(graph)->len; i++) {
+        if (RARRAY(graphPtr[i])->len < 1) {
+            // No valid triangles touched this node -- include *all* possible neighbors
+            for(j = 0; j < RARRAY(points)->len; j++) {
+                if (j != i) {
+                    rb_ary_push(graphPtr[i], INT2FIX(j));
+                    if (i > j || !rb_ary_includes(graphPtr[j], INT2FIX(i)))
+                        rb_ary_push(graphPtr[j], INT2FIX(i));
+                }
+            }
+        } else {
+            rb_funcall(graphPtr[i], rb_intern("uniq!"), 0);
+        }
+    }
 
     rb_iv_set(self, "@nn_graph", graph);
     

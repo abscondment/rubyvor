@@ -34,6 +34,10 @@ class TestComputation < MiniTest::Unit::TestCase
                       [4, 5, 6, 8],       # 7
                       [0, 2, 3, 5, 6, 7], # 8
                      ]
+    
+    comp.nn_graph.each_with_index do |neighbors,i|
+      refute_empty neighbors, "@nn_graph returned empty neighbors for node #{i}"
+    end
 
     assert_equal comp.nn_graph.map{|v| v.sort}.sort, \
                  expected_graph.map{|v| v.sort}.sort
@@ -149,11 +153,36 @@ class TestComputation < MiniTest::Unit::TestCase
 
   
   def test_duplicate_points
-    comp = RubyVor::VDDT::Computation.from_points([RubyVor::Point.new(1,1), RubyVor::Point.new(1,1), RubyVor::Point.new(2,3), RubyVor::Point.new(1,1), RubyVor::Point.new(4,0)])
-    refute_equal comp.nn_graph,               nil
-    refute_equal comp.minimum_spanning_tree,  nil
-    refute_equal comp.cluster_by_distance(3), nil
-    refute_equal comp.cluster_by_size([2]),   nil
+    comp = RubyVor::VDDT::Computation.from_points([
+                                                   RubyVor::Point.new(2,3),      # 0
+                                                   RubyVor::Point.new(1,1),      # 1
+                                                   RubyVor::Point.new(1,1),      # 2
+                                                   RubyVor::Point.new(1,1),      # 3
+                                                   RubyVor::Point.new(1,1),      # 4
+                                                   RubyVor::Point.new(1,1),      # 5
+                                                   RubyVor::Point.new(1,1),      # 6
+                                                   RubyVor::Point.new(1,1),      # 7
+                                                   RubyVor::Point.new(1,1),      # 8
+                                                   RubyVor::Point.new(4,10),     # 9
+                                                   RubyVor::Point.new(4,10.0),   # 10
+                                                   RubyVor::Point.new(4.0,10.0), # 11
+                                                   RubyVor::Point.new(4.0,10.0), # 12
+                                                  ])
+    comp.nn_graph.each_with_index do |neighbors,i|
+      refute_empty neighbors, "@nn_graph returned empty neighbors for node #{i}"
+    end
+    
+    assert_equal [[0], [1,2,3,4,5,6,7,8], [9,10,11,12]], \
+                 comp.cluster_by_distance(1).map{|cl| cl.sort}.sort
+    
+    assert_equal [[0,1,2,3,4,5,6,7,8], [9,10,11,12]], \
+                 comp.cluster_by_distance(5).map{|cl| cl.sort}.sort
+
+    assert_equal [[0,1,2,3,4,5,6,7,8,9,10,11,12]], \
+                 comp.cluster_by_distance(10).map{|cl| cl.sort}.sort
+    
+    assert_equal [[0,1,2,3,4,5,6,7,8], [9,10,11,12]], \
+                 comp.cluster_by_size([2])[2].map{|cl| cl.sort}.sort
   end
 
   
