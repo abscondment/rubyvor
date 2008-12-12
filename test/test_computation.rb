@@ -147,6 +147,16 @@ class TestComputation < MiniTest::Unit::TestCase
 
   end
 
+  
+  def test_duplicate_points
+    comp = RubyVor::VDDT::Computation.from_points([RubyVor::Point.new(1,1), RubyVor::Point.new(1,1), RubyVor::Point.new(2,3), RubyVor::Point.new(1,1), RubyVor::Point.new(4,0)])
+    refute_equal comp.nn_graph,               nil
+    refute_equal comp.minimum_spanning_tree,  nil
+    refute_equal comp.cluster_by_distance(3), nil
+    refute_equal comp.cluster_by_size([2]),   nil
+  end
+
+  
   def test_bad_data
     assert_raises TypeError do
       comp = RubyVor::VDDT::Computation.from_points([RubyVor::Point.new(1,1), RubyVor::Point.new(21,3), RubyVor::Point.new(2,:s)])
@@ -170,7 +180,7 @@ class TestComputation < MiniTest::Unit::TestCase
     end
   end
 
-
+  
   def test_cluster_by_size
     comp = RubyVor::VDDT::Computation.from_points([
                                                    RubyVor::Point.new(0.25, 0.25),
