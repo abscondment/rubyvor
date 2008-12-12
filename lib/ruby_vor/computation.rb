@@ -17,7 +17,6 @@ module RubyVor
       # This method allows the caller to pass in a lambda for customizing distance calculations. For instance, to use a GeoRuby::SimpleFeatures::Point, one would:
       #  > cluster_by_distance(50 lambda{|a,b| a.spherical_distance(b, 3958.754)}) # this rejects edges greater than 50 miles, using spherical distance as a measure
       def cluster_by_distance(max_distance, dist_proc=lambda{|a,b| a.distance_from(b)})
-
         clusters = []
         nodes    = (0..points.length-1).to_a
         visited  = [false] * points.length
@@ -112,12 +111,12 @@ module RubyVor
 
         end
 
-
-        nodes.map! do |n|
-          n.data[3].inject({}) do |h,v|
-            h[v.data[0]] = v.priority
-            h
+        nodes.inject({}) do |h,adjacency_list|
+          v = adjacency_list.data[0]
+          adjacency_list.data[3].each do |node|
+            h[ (v < node.data[0]) ? [v,node.data[0]] : [node.data[0],v] ] ||= node.priority
           end
+          h
         end
       end
 
@@ -133,21 +132,59 @@ module RubyVor
         #   2. Determine remaining connectivity using BFS as above?
         #   3. Some other more efficient connectivity test?
         #   4. Return {n1 => cluster, n2 => cluster} for all n.
-      end
+        
+        sized_clusters = sizes.inject({}) {|h,s| h[s] = []; h}
+        
+        
+        mst = minimum_spanning_tree.to_a
+        mst.sort!{|a,b|a.last <=> b.last}
+        
+        sizes = sizes.sort
+        last_size = 0
+        while current_size = sizes.shift
+          current_size -= 1
 
-      protected
+          # Remove edge count delta
+          delta = current_size - last_size
+          mst.slice!(-delta,delta)
+          
+          visited  = [nil] * points.length
 
-      def weighted_edges(dist_proc)
-        v = 0
-        edges = nn_graph.inject({}) do |eh, neighbors|
-          neighbors.each do |neighbor|
-            k = [v,neighbor].sort
-            eh[k] = dist_proc.call(points[v],points[neighbor]) unless eh.has_key?(k)
+
+        
+          for edge in mst
+            i, j = edge.first
+            
+            next if !visited[i].nil? && visited[i] == visited[j]
+            
+            if visited[i] && visited[j]
+              visited[i].concat(visited[j])
+              visited[i].uniq!
+              visited[j].each{|v| visited[v] = visited[i]}
+              visited[j] = visited[i]
+            else
+              cluster = visited[i] || visited[j] || []  
+              cluster.push(i) unless visited[i]
+              cluster.push(j) unless visited[j]
+              visited[i] = visited[j] = cluster
+            end
           end
-          v += 1
-          eh
-        end.to_a
+
+        
+          visited.each_with_index do |visits, v|
+            if visits.nil?
+              visited[v] = [v]
+            end
+          end
+          
+          sized_clusters[current_size + 1] = visited.uniq
+          
+          last_size = current_size
+        end
+        
+        sized_clusters
       end
+
 
     end
   end

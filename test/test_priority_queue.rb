@@ -44,7 +44,7 @@ class TestPriorityQueue < MiniTest::Unit::TestCase
 
     old_n = -1.0 * Float::MAX
     while n = q.pop
-      assert n.priority >= old_n
+      assert n.priority >= old_n, 'Heap-order property violated'
       old_n = n.priority
     end
   end
@@ -96,6 +96,22 @@ class TestPriorityQueue < MiniTest::Unit::TestCase
     end
   end
 
+  def test_build_queue
+    n = 100
+    
+    q = RubyVor::PriorityQueue.build_queue(n) do |queue_item|
+      queue_item.priority = rand * 10000.0 - 5000.0
+    end
+
+    assert_equal n, q.data.length
+    assert_equal n, q.size
+    
+    old_n = -1.0 * Float::MAX
+    while n = q.pop
+      assert n.priority >= old_n, 'Heap-order property violated'
+      old_n = n.priority
+    end
+  end
   
   private
   

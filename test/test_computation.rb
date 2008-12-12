@@ -47,17 +47,15 @@ class TestComputation < MiniTest::Unit::TestCase
              ]
 
     comp = RubyVor::VDDT::Computation.from_points(points)
-
     expected_mst = [
-                    [1],
-                    [0,2],
-                    [1]
+                    [0,1],
+                    [1,2]
                    ]
     computed_mst = comp.minimum_spanning_tree
 
     # Assert nodes are correct
-    assert_equal expected_mst.map{|v| v.sort}.sort, \
-                 computed_mst.map{|v| v.keys.sort}.sort
+    assert_equal expected_mst.sort, \
+                 computed_mst.keys.sort
   end
   
   def test_advanced_mst
@@ -95,36 +93,35 @@ class TestComputation < MiniTest::Unit::TestCase
     comp = RubyVor::VDDT::Computation.from_points(points)
 
     expected_mst = [
-                    [1,13],    # 0
-                    [0,2,5],   # 1
-                    [1,3],     # 2
-                    [2,4],     # 3
-                    [3],       # 4
-                    [1,6,10],  # 5
-                    [5,7],     # 6
-                    [6,8],     # 7
-                    [7,9],     # 8
-                    [8],       # 9
-                    [5,11],    # 10
-                    [10,12],   # 11
-                    [11],      # 12
-                    [0,14,16], # 13
-                    [13,15],   # 14
-                    [14],      # 15
-                    [13,17],   # 16
-                    [16,18],   # 17
-                    [17,19],   # 18
-                    [18,20],   # 19
-                    [19,21],   # 20
-                    [20,22],   # 21
-                    [21,23],   # 22
-                    [22,24],   # 23
-                    [23]       # 24
+                    [0,1],
+                    [0,13],
+                    [1,2],
+                    [1,5],
+                    [2,3],
+                    [3,4],
+                    [5,6],
+                    [5,10],
+                    [6,7],
+                    [7,8],
+                    [8,9],
+                    [10,11],
+                    [11,12],
+                    [13,14],
+                    [13,16],
+                    [14,15],
+                    [16,17],
+                    [17,18],
+                    [18,19],
+                    [19,20],
+                    [20,21],
+                    [21,22],
+                    [22,23],
+                    [23,24]
                    ]
     computed_mst = comp.minimum_spanning_tree
     
-    assert_equal expected_mst.map{|v| v.sort}.sort, \
-                 computed_mst.map{|v| v.keys.sort}.sort
+    assert_equal expected_mst.sort, \
+                 computed_mst.keys.sort
   end
   
   def test_cluster_by_distance
@@ -171,6 +168,39 @@ class TestComputation < MiniTest::Unit::TestCase
     assert_raises ArgumentError do
       cl = comp.cluster_by_distance(nil)
     end
+  end
+
+
+  def test_cluster_by_size
+    comp = RubyVor::VDDT::Computation.from_points([
+                                                   RubyVor::Point.new(0.25, 0.25),
+                                                   RubyVor::Point.new(1, 0.25),
+                                                   RubyVor::Point.new(0.5, 1),
+                                                   RubyVor::Point.new(5, 5),
+                                                   RubyVor::Point.new(10.25, 10.25),
+                                                   RubyVor::Point.new(13, 9),
+                                                   RubyVor::Point.new(9, 9)
+                                                  ])
+
+    sizes = [1, 3, 5, 7]
+    
+    computed_sized_clusters = comp.cluster_by_size(sizes)
+
+    # Check that we got clusters for each size requested
+    assert_equal sizes, \
+                 computed_sized_clusters.keys.sort                 
+
+    assert_equal [[0,1,2,3,4,5,6]], \
+                 computed_sized_clusters[1].map{|cl| cl.sort}.sort
+    
+    assert_equal [[0,1,2], [3], [4,5,6]], \
+                 computed_sized_clusters[3].map{|cl| cl.sort}.sort
+
+    assert_equal [[0,1,2], [3], [4], [5], [6]], \
+                 computed_sized_clusters[5].map{|cl| cl.sort}.sort
+
+    assert_equal [[0], [1], [2], [3], [4], [5], [6]], \
+                 computed_sized_clusters[7].sort
   end
 
   #

@@ -2,8 +2,33 @@ module RubyVor
   class PriorityQueue
 
     attr_reader :data, :size
+
+    class << self
+      def build_queue(max_index=-1,&block)
+        data = []
+
+        index = 0
+        loop do
+          x = QueueItem.new(nil, nil, nil)
+
+          yield(x)
+          break if !(max_index < 0 || index < max_index) || x.priority.nil?
+          
+          x.index = index
+          data.push(x)
+          index += 1
+        end
+
+        q = new
+        q.instance_variable_set(:@data, data)
+        q.instance_variable_set(:@size, data.length)
+        q.heapify()
+
+        return q
+      end
+    end
     
-    def initialize()
+    def initialize
       @data = []
       @size = 0
       heapify()
