@@ -3,6 +3,8 @@ module RubyVor
     class Computation
       attr_reader :points, :voronoi_diagram_raw, :delaunay_triangulation_raw
 
+      DIST_PROC = lambda{|a,b| a.distance_from(b)}
+      
       # Create a computation from an existing set of raw data.
       def initialize(points=[], vd_raw=[], dt_raw=[])
         @points = points
@@ -16,7 +18,7 @@ module RubyVor
       #
       # This method allows the caller to pass in a lambda for customizing distance calculations. For instance, to use a GeoRuby::SimpleFeatures::Point, one would:
       #  > cluster_by_distance(50 lambda{|a,b| a.spherical_distance(b, 3958.754)}) # this rejects edges greater than 50 miles, using spherical distance as a measure
-      def cluster_by_distance(max_distance, dist_proc=lambda{|a,b| a.distance_from(b)})
+      def cluster_by_distance(max_distance, dist_proc=DIST_PROC)
         clusters = []
         nodes    = (0..points.length-1).to_a
         visited  = [false] * points.length
@@ -57,7 +59,7 @@ module RubyVor
       # Computes the minimum spanning tree for given points, using the Delaunay triangulation as a seed.
       #
       # For points on a Euclidean plane, the MST is always comprised of a subset of the edges in a Delaunay triangulation. This makes computation of the tree very efficient: simply compute the Delaunay triangulation, and then run Prim's algorithm on the resulting edges.
-      def minimum_spanning_tree(dist_proc=lambda{|a,b| a.distance_from(b)})
+      def minimum_spanning_tree(dist_proc=DIST_PROC)
         nodes = []
         q = RubyVor::PriorityQueue.new
         (0..points.length-1).to_a.map do |n|
@@ -120,7 +122,7 @@ module RubyVor
         end
       end
 
-      def cluster_by_size(sizes=[])
+      def cluster_by_size(sizes=[], dist_proc=DIST_PROC)
         # TODO
         # *    (DONE) Create a minimum_spanning_tree routine to:
         #   1. (DONE) compute weights (should be done for us in C?)
@@ -136,7 +138,7 @@ module RubyVor
         sized_clusters = sizes.inject({}) {|h,s| h[s] = []; h}
         
         
-        mst = minimum_spanning_tree.to_a
+        mst = minimum_spanning_tree(dist_proc).to_a
         mst.sort!{|a,b|a.last <=> b.last}
         
         sizes = sizes.sort
