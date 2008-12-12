@@ -18,6 +18,7 @@ ext/vdefs.h
 ext/voronoi.c
 lib/ruby_vor.rb
 lib/ruby_vor/computation.rb
+lib/ruby_vor/geo_ruby_extensions.rb
 lib/ruby_vor/point.rb
 lib/ruby_vor/priority_queue.rb
 lib/ruby_vor/version.rb

@@ -5,6 +5,7 @@ require 'ruby_vor/version'
 require 'ruby_vor/point'
 require 'ruby_vor/priority_queue'
 require 'ruby_vor/computation'
+require 'ruby_vor/geo_ruby_extensions'
 
 # Require ruby_vor.so last to clobber old from_points
 require 'ruby_vor_c.so'
