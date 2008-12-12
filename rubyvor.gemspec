@@ -3,7 +3,6 @@
 Gem::Specification.new do |s|
   s.name = %q{rubyvor}
   s.version = "0.0.6"
-
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Brendan Ribera"]
   s.date = %q{2008-12-11}
