@@ -1,6 +1,6 @@
 #include <ruby.h>
 #include <vdefs.h>
-#include <ruby_vor.h>
+#include <ruby_vor_c.h>
 
 //
 // Instance methods for RubyVor::VDDT::PriorityQueue

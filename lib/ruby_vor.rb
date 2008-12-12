@@ -7,7 +7,7 @@ require 'ruby_vor/priority_queue'
 require 'ruby_vor/computation'
 
 # Require ruby_vor.so last to clobber old from_points
-require 'ruby_vor.so'
+require 'ruby_vor_c.so'
 
 # DOC HERE
 module RubyVor

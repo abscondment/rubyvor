@@ -1,12 +1,12 @@
 #include <ruby.h>
 #include <vdefs.h>
-#include <ruby_vor.h>
+#include <ruby_vor_c.h>
 
 //
 // Extension initialization
 //
 void
-Init_ruby_vor(void)
+Init_ruby_vor_c(void)
 {
     //
     // Set up our Modules and Class.

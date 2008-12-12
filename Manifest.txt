@@ -12,8 +12,8 @@ ext/output.c
 ext/rb_cComputation.c
 ext/rb_cPoint.c
 ext/rb_cPriorityQueue.c
-ext/ruby_vor.c
-ext/ruby_vor.h
+ext/ruby_vor_c.c
+ext/ruby_vor_c.h
 ext/vdefs.h
 ext/voronoi.c
 lib/ruby_vor.rb

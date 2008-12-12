@@ -1,6 +1,6 @@
 #include <ruby.h>
 #include <vdefs.h>
-#include <ruby_vor.h>
+#include <ruby_vor_c.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -228,7 +228,7 @@ RubyVor_nn_graph(VALUE self)
             for(j = 0; j < RARRAY(points)->len; j++) {
                 if (j != i) {
                     rb_ary_push(graphPtr[i], INT2FIX(j));
-                    if (i > j || !rb_ary_includes(graphPtr[j], INT2FIX(i)))
+                    if ((i > j && RARRAY(graphPtr[j])->len > 0) || !rb_ary_includes(graphPtr[j], INT2FIX(i)))
                         rb_ary_push(graphPtr[j], INT2FIX(i));
                 }
             }

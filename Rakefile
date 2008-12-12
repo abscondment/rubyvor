@@ -19,7 +19,7 @@ desc "Compile extensions"
 task :compile => EXT
 task :test => :compile
 
-file EXT => ['ext/extconf.rb', 'ext/ruby_vor.c'] do
+file EXT => ['ext/extconf.rb', 'ext/ruby_vor_c.c'] do
   Dir.chdir 'ext' do
     ruby 'extconf.rb'
     sh 'make'
