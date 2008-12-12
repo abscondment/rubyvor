@@ -94,3 +94,6 @@ VALUE RubyVor_heapify(VALUE);
  * Compute the Euclidean distance between two points.
  */
 VALUE RubyVor_distance_from(VALUE, VALUE);
+
+
+// keep comment so RDOC will find the last method definition
