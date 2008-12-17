@@ -48,6 +48,7 @@ Init_ruby_vor_c(void)
      */
     RubyVor_rb_cPoint = rb_define_class_under(RubyVor_rb_mRubyVor, "Point", rb_cObject);
     rb_define_method(RubyVor_rb_cPoint, "distance_from", RubyVor_distance_from, 1);
+    rb_define_method(RubyVor_rb_cPoint, "hash", RubyVor_point_hash, 0);
 }
 
 
@@ -95,5 +96,9 @@ VALUE RubyVor_heapify(VALUE);
  */
 VALUE RubyVor_distance_from(VALUE, VALUE);
 
+/*
+ * Hash value for a point.
+ */
+VALUE RubyVor_point_hash(VALUE);
 
 // keep comment so RDOC will find the last method definition
