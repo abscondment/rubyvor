@@ -6,10 +6,12 @@ module RubyVor
       DIST_PROC = lambda{|a,b| a.distance_from(b)}
       
       # Create a computation from an existing set of raw data.
-      def initialize(points=[], vd_raw=[], dt_raw=[])
-        @points = points
-        @voronoi_diagram_raw = vd_raw
-        @delaunay_triangulation_raw = dt_raw
+      def initialize
+        @points = []
+        @unique_points = []
+        @point_map = {}
+        @voronoi_diagram_raw = []
+        @delaunay_triangulation_raw = []
         @nn_graph = nil
       end
 
@@ -30,6 +32,7 @@ module RubyVor
             dist_proc[points[v], points[neighbor]] < max_distance
           end
         end
+
         
         until nodes.empty?
           v = nodes.pop
@@ -110,16 +113,15 @@ module RubyVor
               end
             end
           end
-
         end
 
-        nodes.inject({}) do |h,adjacency_list|
-          v = adjacency_list.data[0]
-          adjacency_list.data[3].each do |node|
-            h[ (v < node.data[0]) ? [v,node.data[0]] : [node.data[0],v] ] ||= node.priority
+        nodes.inject({}) do |h,item|
+          unless item.data[1].nil?
+            key = (item.data[0] < item.data[1].data[0]) ? [item.data[0], item.data[1].data[0]] : [item.data[1].data[0], item.data[0]]
+            h[key] ||= item.priority
           end
           h
-        end
+        end        
       end
 
       def cluster_by_size(sizes=[], dist_proc=DIST_PROC)
@@ -151,8 +153,6 @@ module RubyVor
           mst.slice!(-delta,delta)
           
           visited  = [nil] * points.length
-
-
         
           for edge in mst
             i, j = edge.first

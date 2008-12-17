@@ -32,35 +32,40 @@ RubyVor_from_points(VALUE self, VALUE pointsArray)
     x = rb_intern("x");
     y = rb_intern("y");
 
-    // Load up point count & points pointer.
-    inSize = RARRAY(pointsArray)->len;
-    inPtr  = RARRAY(pointsArray)->ptr;
 
     // Require nonzero size and x & y methods on each array object
-    if (inSize < 1)
+    if (RARRAY(pointsArray)->len < 1)
         rb_raise(rb_eRuntimeError, "points array have a nonzero length");
-    for (i = 0; i < inSize; i++) {
-        if(!rb_respond_to(inPtr[i], x) || !rb_respond_to(inPtr[i], y))
+    for (i = 0; i < RARRAY(pointsArray)->len; i++) {
+        if(!rb_respond_to(RARRAY(pointsArray)->ptr[i], x) || !rb_respond_to(RARRAY(pointsArray)->ptr[i], y))
             rb_raise(rb_eRuntimeError, "members of points array must respond to 'x' and 'y'");
     }
 
+    // Load up point count & points pointer.
+    pointsArray = rb_funcall(pointsArray, rb_intern("uniq"), 0);
+    inSize = RARRAY(pointsArray)->len;
+    inPtr  = RARRAY(pointsArray)->ptr;
+
     
     // Initialize rubyvorState
-    initialize_state(/* debug? */ 0);
+    initialize_state(0 /* debug? */);
     debug_memory();
     
     // Create our return object.
-    newComp = rb_funcall(self, rb_intern("new"), 1, pointsArray);
+    newComp = rb_funcall(self, rb_intern("new"), 0);
+    rb_iv_set(newComp, "@points", pointsArray);
+    
     // Store it in rubyvorState so we can populate its values.
     rubyvorState.comp = (void *) &newComp;
+    
     //
     // Read in the sites, sort, and compute xmin, xmax, ymin, ymax
     //
     // TODO: refactor this block into a separate method for clarity?
     //
     {
-        // Allocate memory for 4000 sites...
-        rubyvorState.sites = (Site *) myalloc(4000 * sizeof(Site));
+        // Allocate memory for N sites...
+        rubyvorState.sites = (Site *) myalloc(inSize * sizeof(Site));
     
     
         // Iterate over the arrays, doubling the incoming values.
@@ -73,10 +78,10 @@ RubyVor_from_points(VALUE self, VALUE pointsArray)
             rubyvorState.sites[rubyvorState.nsites].sitenbr = rubyvorState.nsites;
             rubyvorState.sites[rubyvorState.nsites++].refcnt = 0;
             
-            // Allocate for 4000 more if we just hit a multiple of 4000...
-            if (rubyvorState.nsites % 4000 == 0)
+            // Allocate for N more if we just hit a multiple of N...
+            if (rubyvorState.nsites % inSize == 0)
             {
-                rubyvorState.sites = (Site *)myrealloc(rubyvorState.sites,(rubyvorState.nsites+4000)*sizeof(Site),rubyvorState.nsites*sizeof(Site));
+                rubyvorState.sites = (Site *)myrealloc(rubyvorState.sites,(rubyvorState.nsites+inSize)*sizeof(Site),rubyvorState.nsites*sizeof(Site));
             }
         }
         
@@ -189,7 +194,7 @@ RubyVor_minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
 VALUE
 RubyVor_nn_graph(VALUE self)
 {
-    long i, j;
+    long i, j, k, x;
     VALUE dtRaw, graph, points, * dtPtr, * tripletPtr, * graphPtr;
 
     graph = rb_iv_get(self, "@nn_graph");
@@ -199,6 +204,7 @@ RubyVor_nn_graph(VALUE self)
 
     // Create an array of same size as points for the graph
     points = rb_iv_get(self, "@points");
+    
     graph = rb_ary_new2(RARRAY(points)->len);
     for (i = 0; i < RARRAY(points)->len; i++)
         rb_ary_push(graph, rb_ary_new());
@@ -212,6 +218,13 @@ RubyVor_nn_graph(VALUE self)
     for (i = 0; i < RARRAY(dtRaw)->len; i++) {
         tripletPtr = RARRAY(dtPtr[i])->ptr;
 
+        /*
+        for (x = 0; x < 3; x++) {
+            rb_ary_push(graphPtr[FIX2INT(tripletPtr[x % 2 + 1])], FIX2INT(tripletPtr[x & 6]));
+            rb_ary_push(graphPtr[FIX2INT(tripletPtr[x & 6])], FIX2INT(tripletPtr[x % 2 + 1]));
+        }
+        */
+
         rb_ary_push(graphPtr[FIX2INT(tripletPtr[0])], tripletPtr[1]);
         rb_ary_push(graphPtr[FIX2INT(tripletPtr[1])], tripletPtr[0]);
 
@@ -220,10 +233,12 @@ RubyVor_nn_graph(VALUE self)
 
         rb_ary_push(graphPtr[FIX2INT(tripletPtr[1])], tripletPtr[2]);
         rb_ary_push(graphPtr[FIX2INT(tripletPtr[2])], tripletPtr[1]);
+        
     }
-
     for (i = 0; i < RARRAY(graph)->len; i++) {
         if (RARRAY(graphPtr[i])->len < 1) {
+            rb_raise(rb_eIndexError, "index of 0 (no neighbors) at %i", i);
+            /*
             // No valid triangles touched this node -- include *all* possible neighbors
             for(j = 0; j < RARRAY(points)->len; j++) {
                 if (j != i) {
@@ -232,6 +247,7 @@ RubyVor_nn_graph(VALUE self)
                         rb_ary_push(graphPtr[j], INT2FIX(i));
                 }
             }
+            */
         } else {
             rb_funcall(graphPtr[i], rb_intern("uniq!"), 0);
         }

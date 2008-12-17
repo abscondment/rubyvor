@@ -11,7 +11,7 @@ class TestComputation < MiniTest::Unit::TestCase
 
   def test_nn_graph
     comp = RubyVor::VDDT::Computation.from_points(sample_points)
-
+    
     # based on this expected delaunay trianglulation:
     #    3 2 1
     #    3 0 2
@@ -34,7 +34,8 @@ class TestComputation < MiniTest::Unit::TestCase
                       [4, 5, 6, 8],       # 7
                       [0, 2, 3, 5, 6, 7], # 8
                      ]
-    
+
+
     comp.nn_graph.each_with_index do |neighbors,i|
       refute_empty neighbors, "@nn_graph returned empty neighbors for node #{i}"
     end
@@ -169,20 +170,43 @@ class TestComputation < MiniTest::Unit::TestCase
                                                    RubyVor::Point.new(4.0,10.0), # 12
                                                   ])
     comp.nn_graph.each_with_index do |neighbors,i|
-      refute_empty neighbors, "@nn_graph returned empty neighbors for node #{i}"
+      refute_empty neighbors, "@nn_graph has empty neighbors for node #{i}"
     end
-    
+
+=begin
     assert_equal [[0], [1,2,3,4,5,6,7,8], [9,10,11,12]], \
-                 comp.cluster_by_distance(1).map{|cl| cl.sort}.sort
+                 comp.cluster_by_distance(1).map{|cl| cl.sort}.sort, \
+                 "cluster by distance 1"
     
     assert_equal [[0,1,2,3,4,5,6,7,8], [9,10,11,12]], \
-                 comp.cluster_by_distance(5).map{|cl| cl.sort}.sort
+                 comp.cluster_by_distance(5).map{|cl| cl.sort}.sort, \
+                 "cluster by distance 5"
 
     assert_equal [[0,1,2,3,4,5,6,7,8,9,10,11,12]], \
-                 comp.cluster_by_distance(10).map{|cl| cl.sort}.sort
+                 comp.cluster_by_distance(10).map{|cl| cl.sort}.sort, \
+                 "cluster by distance 10"
     
     assert_equal [[0,1,2,3,4,5,6,7,8], [9,10,11,12]], \
-                 comp.cluster_by_size([2])[2].map{|cl| cl.sort}.sort
+                 comp.cluster_by_size([2])[2].map{|cl| cl.sort}.sort, \
+                 "cluster by size 2"
+=end
+
+    assert_equal [[0], [1], [2]], \
+                 comp.cluster_by_distance(1).map{|cl| cl.sort}.sort, \
+                 "cluster by distance 1"
+    
+    assert_equal [[0,1], [2]], \
+                 comp.cluster_by_distance(5).map{|cl| cl.sort}.sort, \
+                 "cluster by distance 5"
+
+    assert_equal [[0,1,2]], \
+                 comp.cluster_by_distance(10).map{|cl| cl.sort}.sort, \
+                 "cluster by distance 10"
+    
+    assert_equal [[0,1], [2]], \
+                 comp.cluster_by_size([2])[2].map{|cl| cl.sort}.sort, \
+                 "cluster by size 2"
+
   end
 
   
@@ -212,13 +236,13 @@ class TestComputation < MiniTest::Unit::TestCase
   
   def test_cluster_by_size
     comp = RubyVor::VDDT::Computation.from_points([
-                                                   RubyVor::Point.new(0.25, 0.25),
-                                                   RubyVor::Point.new(1, 0.25),
-                                                   RubyVor::Point.new(0.5, 1),
-                                                   RubyVor::Point.new(5, 5),
-                                                   RubyVor::Point.new(10.25, 10.25),
-                                                   RubyVor::Point.new(13, 9),
-                                                   RubyVor::Point.new(9, 9)
+                                                   RubyVor::Point.new(0.25, 0.25),   # 0
+                                                   RubyVor::Point.new(1, 0.25),      # 1
+                                                   RubyVor::Point.new(0.5, 1),       # 2
+                                                   RubyVor::Point.new(5, 5),         # 3
+                                                   RubyVor::Point.new(10.25, 10.25), # 4
+                                                   RubyVor::Point.new(13, 9),        # 5
+                                                   RubyVor::Point.new(9, 9)          # 6
                                                   ])
 
     sizes = [1, 3, 5, 7]
