@@ -2,16 +2,16 @@
 
 Gem::Specification.new do |s|
   s.name = %q{rubyvor}
-  s.version = "0.0.7"
+  s.version = "0.0.8"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Brendan Ribera"]
-  s.date = %q{2008-12-12}
+  s.date = %q{2008-12-23}
   s.description = %q{RubyVor provides efficient computation of Voronoi diagrams and Delaunay triangulation for a set of Ruby points. It is intended to function as a complemenet to GeoRuby. These structures can be used to compute a nearest-neighbor graph for a set of points. This graph can in turn be used for proximity-based clustering of the input points.}
   s.email = ["brendan.ribera+rubyvor@gmail.com"]
   s.extensions = ["ext/extconf.rb"]
   s.extra_rdoc_files = ["History.txt", "Manifest.txt", "README.txt"]
-  s.files = ["History.txt", "Manifest.txt", "README.txt", "Rakefile", "ext/Doc", "ext/edgelist.c", "ext/extconf.rb", "ext/geometry.c", "ext/heap.c", "ext/memory.c", "ext/output.c", "ext/rb_cComputation.c", "ext/rb_cPoint.c", "ext/rb_cPriorityQueue.c", "ext/ruby_vor_c.c", "ext/ruby_vor_c.h", "ext/vdefs.h", "ext/voronoi.c", "lib/ruby_vor.rb", "lib/ruby_vor/computation.rb", "lib/ruby_vor/geo_ruby_extensions.rb", "lib/ruby_vor/point.rb", "lib/ruby_vor/priority_queue.rb", "lib/ruby_vor/version.rb", "rubyvor.gemspec", "test/test_computation.rb", "test/test_priority_queue.rb", "test/test_voronoi_interface.rb"]
+  s.files = ["History.txt", "Manifest.txt", "README.txt", "Rakefile", "ext/Doc", "ext/edgelist.c", "ext/extconf.rb", "ext/geometry.c", "ext/heap.c", "ext/memory.c", "ext/output.c", "ext/rb_cComputation.c", "ext/rb_cPoint.c", "ext/rb_cPriorityQueue.c", "ext/ruby_vor_c.c", "ext/ruby_vor_c.h", "ext/vdefs.h", "ext/voronoi.c", "lib/ruby_vor.rb", "lib/ruby_vor/computation.rb", "lib/ruby_vor/geo_ruby_extensions.rb", "lib/ruby_vor/point.rb", "lib/ruby_vor/priority_queue.rb", "lib/ruby_vor/version.rb", "lib/ruby_vor/visualizer.rb", "rubyvor.gemspec", "test/test_computation.rb", "test/test_priority_queue.rb", "test/test_voronoi_interface.rb"]
   s.has_rdoc = true
   s.homepage = %q{http://github.com/bribera/rubyvor}
   s.rdoc_options = ["--main", "README.txt"]

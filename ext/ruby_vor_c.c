@@ -2,15 +2,15 @@
 #include <vdefs.h>
 #include <ruby_vor_c.h>
 
-//
-// Extension initialization
-//
+/*
+ * Extension initialization
+ */
 void
 Init_ruby_vor_c(void)
 {
-    //
-    // Set up our Modules and Class.
-    //
+    /*
+     * Set up our Modules and Class.
+     */
 
     /*
      * Main RubyVor namespace.
@@ -30,7 +30,7 @@ Init_ruby_vor_c(void)
     RubyVor_rb_cComputation   = rb_define_class_under(RubyVor_rb_mVDDT, "Computation", rb_cObject);
     rb_define_singleton_method(RubyVor_rb_cComputation, "from_points", RubyVor_from_points, 1);
     rb_define_method(RubyVor_rb_cComputation, "nn_graph", RubyVor_nn_graph, 0);
-    // rb_define_method(RubyVor_rb_cComputation, "minimum_spanning_tree", RubyVor_minimum_spanning_tree, -1);
+    rb_define_method(RubyVor_rb_cComputation, "minimum_spanning_tree", RubyVor_minimum_spanning_tree, -1);
 
     
     /*
@@ -54,9 +54,9 @@ Init_ruby_vor_c(void)
 
 
 
-//
-// Method declarations duplicated here for RDOC
-//
+/*
+ * Method declarations duplicated here for RDOC
+ */
 
 /*
  * Compute the voronoi diagram and delaunay triangulation from a set of points.
@@ -72,9 +72,11 @@ VALUE RubyVor_from_points(VALUE, VALUE);
 VALUE RubyVor_nn_graph(VALUE);
 
 /*
- * Compute the MST for the nearest-nearest graph using a Priority Queue and Prim's algorithm.
+ * Computes the minimum spanning tree for given points, using the Delaunay triangulation as a seed.
+ *
+ * For points on a Euclidean plane, the MST is always comprised of a subset of the edges in a Delaunay triangulation. This makes computation of the tree very efficient: simply compute the Delaunay triangulation, and then run Prim's algorithm on the resulting edges.
  */
-// VALUE RubyVor_minimum_spanning_tree(int, VALUE*, VALUE);
+VALUE RubyVor_minimum_spanning_tree(int, VALUE*, VALUE);
 
 /*
  * Move from the given index up, restoring the heap-order property.
@@ -101,4 +103,4 @@ VALUE RubyVor_distance_from(VALUE, VALUE);
  */
 VALUE RubyVor_point_hash(VALUE);
 
-// keep comment so RDOC will find the last method definition
+/* keep comment so RDOC will find the last method definition */

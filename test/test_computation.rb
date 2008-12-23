@@ -57,7 +57,7 @@ class TestComputation < MiniTest::Unit::TestCase
                     [1,2]
                    ]
     computed_mst = comp.minimum_spanning_tree
-
+    
     # Assert nodes are correct
     assert_equal expected_mst.sort, \
                  computed_mst.keys.sort
@@ -254,7 +254,8 @@ class TestComputation < MiniTest::Unit::TestCase
                  computed_sized_clusters.keys.sort                 
 
     assert_equal [[0,1,2,3,4,5,6]], \
-                 computed_sized_clusters[1].map{|cl| cl.sort}.sort
+                 computed_sized_clusters[1].map{|cl| cl.sort}.sort, \
+                 'Failed cluster of size 1'
     
     assert_equal [[0,1,2], [3], [4,5,6]], \
                  computed_sized_clusters[3].map{|cl| cl.sort}.sort

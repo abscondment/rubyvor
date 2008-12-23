@@ -10,11 +10,23 @@ module RubyVor
     def <=>(p)
       (@x != p.x) ? @x <=> p.x : @y <=> p.y
     end
+
+    def <(p)
+      (self <=> p) == -1
+    end
+
+    def >(p)
+      (self <=> p) == 1
+    end
     
     def ==(p)
       @x == p.x && @y == p.y
     end
     alias :eql? :==
+
+    def to_s
+      "(#{@x},#{@y})"
+    end    
 
   end
 end

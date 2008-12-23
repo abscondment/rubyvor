@@ -19,7 +19,7 @@ VALUE RubyVor_rb_mVDDT;
 VALUE RubyVor_rb_cComputation;
 VALUE RubyVor_from_points(VALUE, VALUE);
 VALUE RubyVor_nn_graph(VALUE);
-// VALUE minimum_spanning_tree(int, VALUE*, VALUE);
+VALUE RubyVor_minimum_spanning_tree(int, VALUE*, VALUE);
 
 /* PriorityQueue */
 VALUE RubyVor_rb_cPriorityQueue;

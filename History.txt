@@ -1,3 +1,9 @@
+=== 0.0.8 / 2008-12-23
+
+* Several C warning fixes (more ISO C compliance unused variables, etc)
+* Moved minimum_spanning_tree computation into C, yielding large speed gain.
+* Basic SVG visualization.
+
 === 0.0.7 / 2008-12-12
 
 * Bugfix: there are cases where performing a Delaunay triangulation on a set of points will not yield a complete nearest neighbor graph. This causes computation of the minimum spanning tree and clustering to fail for these nodes (they always appear as disconnected from the main graph).

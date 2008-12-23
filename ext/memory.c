@@ -86,9 +86,11 @@ myrealloc(void * oldp, unsigned n, unsigned oldn)
 
     update_memory_map(newp);
 
-    // Mark oldp as freed, since free() was called by realloc.
-    //
-    // TODO: this seems naive; measure if this is a bottleneck & use a hash table or some other scheme if it is.
+    /*
+     * Mark oldp as freed, since free() was called by realloc.
+     *
+     * TODO: this seems naive; measure if this is a bottleneck & use a hash table or some other scheme if it is.
+     */
     for (i=0; i<nallocs; i++)
     {
         if (memory_map[i] != (char*)0 && memory_map[i] == oldp)

@@ -17,11 +17,11 @@ void range(float pxmin, float pxmax, float pymin, float pymax) {}
 void
 out_bisector(Edge * e)
 {
-    // Save line to our ruby object
+    /* Save line to our ruby object */
     (*rubyvorState.storeL)(e->a, e->b, e->c);
 
     
-    // printf("l %f %f %f\n", e->a, e->b, e->c);
+    /* printf("l %f %f %f\n", e->a, e->b, e->c); */
     
     if (rubyvorState.plot)
         line(e->reg[0]->coord.x, e->reg[0]->coord.y, e->reg[1]->coord.x, e->reg[1]->coord.y);
@@ -33,7 +33,7 @@ out_bisector(Edge * e)
 void
 out_ep(Edge * e)
 {
-    // Save endpoint to our ruby object
+    /* Save endpoint to our ruby object */
     (*rubyvorState.storeE)(e->edgenbr,
                            e->ep[le] != (Site *)NULL ? e->ep[le]->sitenbr : -1,
                            e->ep[re] != (Site *)NULL ? e->ep[re]->sitenbr : -1);
@@ -51,10 +51,10 @@ out_ep(Edge * e)
 void
 out_vertex(Site * v)
 {
-    // Save vertex to our ruby object
+    /* Save vertex to our ruby object */
     (*rubyvorState.storeV)(v->coord.x, v->coord.y);
     
-    // printf ("v %f %f\n", v->coord.x, v->coord.y) ;
+    /* printf ("v %f %f\n", v->coord.x, v->coord.y) ; */
     
     if (rubyvorState.debug)
         printf("vertex(%d) at %f %f\n", v->sitenbr, v->coord.x, v->coord.y);
@@ -63,10 +63,10 @@ out_vertex(Site * v)
 void
 out_site(Site * s)
 {
-    // Save site to our ruby object
+    /* Save site to our ruby object */
     (*rubyvorState.storeS)(s->coord.x, s->coord.y);
 
-    //printf("s %f %f\n", s->coord.x, s->coord.y) ;
+    /* printf("s %f %f\n", s->coord.x, s->coord.y) ; */
 
     if (rubyvorState.plot)
         circle (s->coord.x, s->coord.y, cradius);
@@ -78,7 +78,7 @@ out_site(Site * s)
 void
 out_triple(Site * s1, Site * s2, Site * s3)
 {
-    // Save triplet to our ruby object
+    /* Save triplet to our ruby object */
     (*rubyvorState.storeT)(s1->sitenbr, s2->sitenbr, s3->sitenbr);
     
     if (rubyvorState.debug)
@@ -222,14 +222,13 @@ clip_line(Edge * e)
 /* Linux-specific. */
 void
 debug_memory(void)
-{
-    if (!rubyvorState.debug)
-        return;
-    
+{    
     char buf[30];
     FILE* pf;
+    int tmp;
+    float totalSize;
+    unsigned size;/*       total program size */
 
-    unsigned size;//       total program size
     /*
     unsigned resident;//   resident set size
     unsigned share;//      shared pages
@@ -238,18 +237,15 @@ debug_memory(void)
     unsigned data;//       data/stack
     unsigned dt;//         dirty pages (unused in Linux 2.6)
     */
-    
-    int retVal;
 
-    float totalSize;
+    if (!rubyvorState.debug)
+        return;
     
     snprintf(buf, 30, "/proc/%u/statm", (unsigned)getpid());
     pf = fopen(buf, "r");
     if (NULL != pf)
     {
-        retVal = fscanf(pf, "%u", &size);
-        //, %u, %u ... etc &resident, &share, &text, &lib, &data);
-        
+        tmp = fscanf(pf, "%u", &size); /*, %u, %u ... etc &resident, &share, &text, &lib, &data); */
         totalSize = (float)size / 1024.0;
         fprintf(stderr, "%f ", totalSize);
     }

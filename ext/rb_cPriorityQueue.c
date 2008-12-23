@@ -2,9 +2,9 @@
 #include <vdefs.h>
 #include <ruby_vor_c.h>
 
-//
-// Instance methods for RubyVor::VDDT::PriorityQueue
-//
+/*
+ * Instance methods for RubyVor::VDDT::PriorityQueue
+ */
 
 
 static VALUE

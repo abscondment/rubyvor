@@ -5,7 +5,7 @@
 #include <vdefs.h>
 #include <stdio.h>
 
-// Static method definitions: C -> Ruby storage methods.
+/* Static method definitions: C -> Ruby storage methods. */
 static void storeTriangulationTriplet(const int, const int, const int);
 static void storeLine(const float, const float, const float);
 static void storeEndpoint(const int, const int, const int);
@@ -20,7 +20,7 @@ static void storeSite(const float, const float);
 
 void initialize_state(int debug)
 {
-    // Set up our initial state
+    /* Set up our initial state */
     rubyvorState.debug = debug;
     rubyvorState.plot = 0;
     rubyvorState.nsites = 0;
@@ -32,13 +32,13 @@ void initialize_state(int debug)
     rubyvorState.storeV = storeVertex;
     rubyvorState.storeS = storeSite;
     
-    // Initialize the Site Freelist
+    /* Initialize the Site Freelist */
     freeinit(&(rubyvorState.sfl), sizeof(Site)) ;
 
-    // Initialize the geometry module
+    /* Initialize the geometry module */
     geominit() ;
 
-    // TODO: remove C plot references
+    /* TODO: remove C plot references */
     if (rubyvorState.plot)
         plotinit();
 }
@@ -52,7 +52,7 @@ voronoi(Site *(*nextsite)(void))
     Halfedge * lbnd, * rbnd, * llbnd, * rrbnd, * bisector ;
     Edge * e ;
 
-    c = 0;
+    newintstar.x = newintstar.y = c = 0;
     
     PQinitialize() ;
     rubyvorState.bottomsite = (*nextsite)() ;
@@ -155,9 +155,9 @@ voronoi(Site *(*nextsite)(void))
 
 
 
-//
-// Static storage methods
-//
+/*
+ * Static storage methods
+ */
 
 /*** stores a triplet of point indices that comprise a Delaunay triangle ***/
 static void
@@ -165,17 +165,17 @@ storeTriangulationTriplet(const int a, const int b, const int c)
 {
     VALUE trArray, triplet;
     
-    // Create a new triplet from the three incoming points
+    /* Create a new triplet from the three incoming points */
     triplet = rb_ary_new2(3);
     
     rb_ary_push(triplet, INT2FIX(a));
     rb_ary_push(triplet, INT2FIX(b));
     rb_ary_push(triplet, INT2FIX(c));
 
-    // Get the existing raw triangulation
+    /* Get the existing raw triangulation */
     trArray = rb_funcall(*(VALUE *)rubyvorState.comp, rb_intern("delaunay_triangulation_raw"), 0);
 
-    // Add the new triplet to it
+    /* Add the new triplet to it */
     rb_ary_push(trArray, triplet);
 }
 
@@ -186,17 +186,17 @@ storeLine(const float a, const float b, const float c)
 {
     VALUE lArray, line;
     
-    // Create a new line from the three values
+    /* Create a new line from the three values */
     line = rb_ary_new2(4);
     rb_ary_push(line, ID2SYM(rb_intern("l")));
     rb_ary_push(line, rb_float_new(a));
     rb_ary_push(line, rb_float_new(b));
     rb_ary_push(line, rb_float_new(c));
 
-    // Get the existing raw voronoi diagram
+    /* Get the existing raw voronoi diagram */
     lArray = rb_funcall(*(VALUE *)rubyvorState.comp, rb_intern("voronoi_diagram_raw"), 0);
 
-    // Add the new line to it
+    /* Add the new line to it */
     rb_ary_push(lArray, line);
 }
 
@@ -211,17 +211,17 @@ storeEndpoint(const int l, const int v1, const int v2)
 {
     VALUE eArray, endpoint;
     
-    // Create a new endpoint from the three values
+    /* Create a new endpoint from the three values */
     endpoint = rb_ary_new2(4);
     rb_ary_push(endpoint, ID2SYM(rb_intern("e")));
     rb_ary_push(endpoint, INT2FIX(l));
     rb_ary_push(endpoint, INT2FIX(v1));
     rb_ary_push(endpoint, INT2FIX(v2));
 
-    // Get the existing raw voronoi diagram
+    /* Get the existing raw voronoi diagram */
     eArray = rb_funcall(*(VALUE *)rubyvorState.comp, rb_intern("voronoi_diagram_raw"), 0);
 
-    // Add the new endpoint to it
+    /* Add the new endpoint to it */
     rb_ary_push(eArray, endpoint);
 }
 
@@ -232,16 +232,16 @@ storeVertex(const float a, const float b)
 {
     VALUE vArray, vertex;
     
-    // Create a new vertex from the coordinates
+    /* Create a new vertex from the coordinates */
     vertex = rb_ary_new2(3);
     rb_ary_push(vertex, ID2SYM(rb_intern("v")));
     rb_ary_push(vertex, rb_float_new(a));
     rb_ary_push(vertex, rb_float_new(b));
 
-    // Get the existing raw voronoi diagram
+    /* Get the existing raw voronoi diagram */
     vArray = rb_funcall(*(VALUE *)rubyvorState.comp, rb_intern("voronoi_diagram_raw"), 0);
 
-    // Add the new vertex to it
+    /* Add the new vertex to it */
     rb_ary_push(vArray, vertex);
 }
 
@@ -255,15 +255,15 @@ storeSite(const float x, const float y)
 {
     VALUE sArray, site;
     
-    // Create a new site from the coordinates
+    /* Create a new site from the coordinates */
     site = rb_ary_new2(3);
     rb_ary_push(site, ID2SYM(rb_intern("s")));
     rb_ary_push(site, rb_float_new(x));
     rb_ary_push(site, rb_float_new(y));
 
-    // Get the existing raw voronoi diagram
+    /* Get the existing raw voronoi diagram */
     sArray = rb_funcall(*(VALUE *)rubyvorState.comp, rb_intern("voronoi_diagram_raw"), 0);
 
-    // Add the new site to it
+    /* Add the new site to it */
     rb_ary_push(sArray, site);
 }

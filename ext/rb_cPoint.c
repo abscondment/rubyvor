@@ -23,7 +23,7 @@ RubyVor_point_hash(VALUE self)
     x = NUM2DBL(rb_iv_get(self, "@x"));
     y = NUM2DBL(rb_iv_get(self, "@y"));
 
-    // Bastardized from Ruby's numeric.c
+    /* Bastardized from Ruby's numeric.c */
     
     for (c = (char*)&x, xHash = 0, i = 0; i < sizeof(double); i++) xHash += c[i] * 971;
     for (c = (char*)&y, yHash = 0, i = 0; i < sizeof(double); i++) yHash += c[i] * 971;
