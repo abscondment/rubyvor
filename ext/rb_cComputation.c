@@ -129,7 +129,7 @@ VALUE
 RubyVor_minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
 {
     VALUE mst, dist_proc, nodes, nnGraph, points, queue, tmp, adjacent, adjacentData, adjacentDistance, current, currentData, floatMax;
-    ID i_call, i_push, i_pop, i_data, i_priority, i_priority_eq, i_has_key, i_index;
+    ID i_call, i_push, i_pop, i_has_key;
     long i;
 
     /* 0 mandatory, 1 optional */
@@ -153,11 +153,7 @@ RubyVor_minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
     i_call     = rb_intern("call");
     i_push     = rb_intern("push");
     i_pop      = rb_intern("pop");
-    i_data     = rb_intern("data");
-    i_priority = rb_intern("priority");
-    i_priority_eq = rb_intern("priority=");
     i_has_key  = rb_intern("has_key?");
-    i_index    = rb_intern("index");
     
     points  = rb_iv_get(self, "@points");
     queue   = rb_eval_string("RubyVor::PriorityQueue.new");
@@ -179,10 +175,10 @@ RubyVor_minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
 
         rb_funcall(queue, i_push, 2, tmp, (i == 0) ? rb_float_new(0.0) : floatMax);
     }
-    nodes = rb_obj_clone(rb_funcall(queue, i_data, 0));
+    nodes = rb_obj_clone(rb_iv_get(queue, "@data"));
     
     while(RTEST(current = rb_funcall(queue, i_pop, 0))) {
-        currentData = rb_funcall(current, i_data, 0);
+        currentData = rb_iv_get(current, "@data");
         
         /* mark in_q */
         rb_ary_store(currentData, 4, Qfalse);
@@ -190,7 +186,7 @@ RubyVor_minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
         /* check for presence of parent */
         if (RTEST(RARRAY(currentData)->ptr[1])) {
             /* push this node into adjacency_list of parent */
-            rb_ary_push(RARRAY(rb_funcall(RARRAY(currentData)->ptr[1], i_data, 0))->ptr[3], current);
+            rb_ary_push(RARRAY(rb_iv_get(RARRAY(currentData)->ptr[1], "@data"))->ptr[3], current);
             /* push parent into adjacency_list of this node */
             rb_ary_push(RARRAY(currentData)->ptr[3], RARRAY(currentData)->ptr[1]);
         }
@@ -198,25 +194,24 @@ RubyVor_minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
         for (i = 0; i < RARRAY(RARRAY(currentData)->ptr[2])->len; i++) {
             /* grab indexed node */
             adjacent = RARRAY(nodes)->ptr[FIX2LONG(RARRAY(RARRAY(currentData)->ptr[2])->ptr[i])];
-            adjacentData = rb_funcall(adjacent, i_data, 0);
+            adjacentData = rb_iv_get(adjacent, "@data");
         
             /* check in_q -- only look at new nodes */
             if (Qtrue == RARRAY(adjacentData)->ptr[4]) {
 
                 /* compare points by node -- adjacent against current */
-                adjacentDistance = rb_funcall(dist_proc,
-                                              i_call, 2,
+                adjacentDistance = rb_funcall(dist_proc, i_call, 2,
                                               RARRAY(points)->ptr[FIX2LONG(RARRAY(currentData)->ptr[0])],
                                               RARRAY(points)->ptr[FIX2LONG(RARRAY(adjacentData)->ptr[0])]);
 
                 /* If the new distance is better than our current priority, exchange them. */
-                if (RFLOAT(adjacentDistance)->value < RFLOAT(rb_funcall(adjacent, i_priority, 0))->value) {
+                if (RFLOAT(adjacentDistance)->value < RFLOAT(rb_iv_get(adjacent, "@priority"))->value) {
                     /* set new :parent */
                     rb_ary_store(adjacentData, 1, current);
                     /* update priority */
-                    rb_funcall(adjacent, i_priority_eq, 1, adjacentDistance);
+                    rb_iv_set(adjacent, "@priority", adjacentDistance);
                     /* percolate up into correctn position */
-                    RubyVor_percolate_up(queue, rb_funcall(adjacent, i_index, 0));
+                    RubyVor_percolate_up(queue, rb_iv_get(adjacent, "@index"));
                 }
             }
         }
@@ -225,9 +220,9 @@ RubyVor_minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
     mst = rb_hash_new();
     for (i = 0; i < RARRAY(nodes)->len; i++) {
         current = RARRAY(nodes)->ptr[i];
-        currentData = rb_funcall(current, i_data, 0);
+        currentData = rb_iv_get(current, "@data");
         if (!NIL_P(RARRAY(currentData)->ptr[1])) {
-            adjacentData = rb_funcall(RARRAY(currentData)->ptr[1], i_data, 0);
+            adjacentData = rb_iv_get(RARRAY(currentData)->ptr[1], "@data");
             tmp = rb_ary_new2(2);
             if (FIX2LONG(RARRAY(currentData)->ptr[0]) < FIX2LONG(RARRAY(adjacentData)->ptr[0])) {
                 rb_ary_push(tmp, RARRAY(currentData)->ptr[0]);
@@ -237,8 +232,7 @@ RubyVor_minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
                 rb_ary_push(tmp, RARRAY(currentData)->ptr[0]);
             }
             if (!RTEST(rb_funcall(mst, i_has_key, 1, tmp))) {
-                rb_hash_aset(mst, tmp, rb_funcall(current, i_priority, 0));
-
+                rb_hash_aset(mst, tmp, rb_iv_get(current, "@priority"));
             }
         }
     }
