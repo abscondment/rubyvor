@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.rubyforge_project = %q{rubyvor}
   s.rubygems_version = %q{1.3.1}
   s.summary = %q{RubyVor provides efficient computation of Voronoi diagrams and Delaunay triangulation for a set of Ruby points}
-  s.test_files = ["test/test_voronoi_interface.rb", "test/test_computation.rb", "test/test_priority_queue.rb"]
+  s.test_files = ["test/test_computation.rb", "test/test_priority_queue.rb", "test/test_voronoi_interface.rb"]
 
   if s.respond_to? :specification_version then
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
