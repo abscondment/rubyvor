@@ -231,9 +231,10 @@ RubyVor_minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
                 rb_ary_push(tmp, RARRAY(adjacentData)->ptr[0]);                
                 rb_ary_push(tmp, RARRAY(currentData)->ptr[0]);
             }
-            if (!RTEST(rb_funcall(mst, i_has_key, 1, tmp))) {
-                rb_hash_aset(mst, tmp, rb_iv_get(current, "@priority"));
-            }
+            
+            /* if (!st_lookup(RHASH(mst)->tbl, tmp, 0)) { */
+            rb_hash_aset(mst, tmp, rb_iv_get(current, "@priority"));
+            /* } */
         }
     }
 
