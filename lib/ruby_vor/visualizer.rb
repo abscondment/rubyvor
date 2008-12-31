@@ -2,7 +2,7 @@ require 'libxml'
 module RubyVor
   class Visualizer
 
-    COLORS = %w{black blue red purple gray lime yellow orange pink}
+    COLORS = %w{black red blue lime gray yellow purple orange pink}
     
     include LibXML
       
@@ -208,8 +208,8 @@ module RubyVor
 
     def self.new_color
       a = rand(256)
-      b = rand(256)# ^ a
-      c = rand(256)# ^ (a | b)
+      b = rand(256) | a
+      c = rand(256) ^ b
       
       "rgb(#{[a,b,c].sort{|k,l| rand(3)-1}.join(',')})"
     end
