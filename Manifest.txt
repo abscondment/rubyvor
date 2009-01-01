@@ -25,5 +25,6 @@ lib/ruby_vor/version.rb
 lib/ruby_vor/visualizer.rb
 rubyvor.gemspec
 test/test_computation.rb
+test/test_point.rb
 test/test_priority_queue.rb
 test/test_voronoi_interface.rb
