@@ -247,13 +247,22 @@ RubyVor_minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
 VALUE
 RubyVor_nn_graph(VALUE self)
 {
-    long i;
     VALUE dtRaw, graph, points, * dtPtr, * tripletPtr, * graphPtr;
+    long i, j, noNeighborResponse;
 
     graph = rb_iv_get(self, "@nn_graph");
     
     if (RTEST(graph))
         return graph;
+
+    /* Figure out our "no neighbor" response value */
+    if (SYM2ID(rb_iv_get(self, "@no_neighbor_response")) == rb_intern("raise")) {
+        noNeighborResponse = 1;
+    } else if (SYM2ID(rb_iv_get(self, "@no_neighbor_response")) == rb_intern("use_all")) {
+        noNeighborResponse = 2;
+    } else {
+        noNeighborResponse = 0;
+    }
 
     /* Create an array of same size as points for the graph */
     points = rb_iv_get(self, "@points");
@@ -283,16 +292,23 @@ RubyVor_nn_graph(VALUE self)
     }
     for (i = 0; i < RARRAY(graph)->len; i++) {
         if (RARRAY(graphPtr[i])->len < 1) {
-            rb_raise(rb_eIndexError, "index of 0 (no neighbors) at %i", i);
-            /* No valid triangles touched this node -- include *all* possible neighbors
-            for(j = 0; j < RARRAY(points)->len; j++) {
-                if (j != i) {
-                    rb_ary_push(graphPtr[i], INT2FIX(j));
-                    if (RARRAY(graphPtr[j])->len > 0 && !rb_ary_includes(graphPtr[j], INT2FIX(i)))
-                        rb_ary_push(graphPtr[j], INT2FIX(i));
+            /* Evaluate noNeighborResponse and respond accordingly */
+            if (noNeighborResponse == 1) {
+                rb_raise(rb_eIndexError, "index of 0 (no neighbors) at %i", i);
+            } else if (noNeighborResponse == 2) {
+                /* No valid triangles touched this node -- include *all* possible neighbors
+                 *
+                 * Note that this can make for exceptionally slow (ie O(n^2) time) clustering,
+                 * but should only happen in rare cases.
+                 */
+                for(j = 0; j < RARRAY(points)->len; j++) {
+                    if (j != i) {
+                        rb_ary_push(graphPtr[i], INT2FIX(j));
+                        if (RARRAY(graphPtr[j])->len > 0 && !rb_ary_includes(graphPtr[j], INT2FIX(i)))
+                            rb_ary_push(graphPtr[j], INT2FIX(i));
+                    }
                 }
             }
-            */
         } else {
             rb_funcall(graphPtr[i], rb_intern("uniq!"), 0);
         }

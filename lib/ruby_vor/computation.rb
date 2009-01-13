@@ -1,19 +1,33 @@
 module RubyVor
   module VDDT
     class Computation
-      attr_reader :points, :voronoi_diagram_raw, :delaunay_triangulation_raw
+      attr_reader :points, :voronoi_diagram_raw, :delaunay_triangulation_raw, :no_neighbor_response
 
       DIST_PROC = lambda{|a,b| a.distance_from(b)}
+      NO_NEIGHBOR_RESPONSES = [:raise, :use_all, :ignore]
       
       # Create a computation from an existing set of raw data.
       def initialize
         @points = []
-        @unique_points = []
-        @point_map = {}
+        
         @voronoi_diagram_raw = []
         @delaunay_triangulation_raw = []
+        
         @nn_graph = nil
         @mst = nil
+
+        @no_neighbor_response = :use_all
+      end
+
+      # Decided what action to take if we find a point with no neighbors
+      # while computing the nn_graph.
+      #
+      # Choices are:
+      #  * :use_all - include all other nodes as potential neighbors. This choice is the default, and can lead to higher big-O lower bounds when clustering.
+      #  * :raise - raise an error
+      #  * :ignore - leave this node disconnected from the rest of the graph.
+      def no_neighbor_response=(v)
+        @no_neighbor_response = v if NO_NEIGHBOR_RESPONSES.include?(v)
       end
 
       # Uses the nearest-neighbors information encapsulated by the Delaunay triangulation as a seed for clustering:

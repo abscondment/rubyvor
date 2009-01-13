@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{rubyvor}
-  s.version = "0.0.9"
+  s.version = "0.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Brendan Ribera"]
-  s.date = %q{2009-01-12}
+  s.date = %q{2009-01-13}
   s.description = %q{RubyVor provides efficient computation of Voronoi diagrams and Delaunay triangulation for a set of Ruby points. It is intended to function as a complemenet to GeoRuby. These structures can be used to compute a nearest-neighbor graph for a set of points. This graph can in turn be used for proximity-based clustering of the input points.}
   s.email = ["brendan.ribera+rubyvor@gmail.com"]
   s.extensions = ["ext/extconf.rb"]

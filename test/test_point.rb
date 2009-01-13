@@ -29,7 +29,7 @@ class TestPoint < MiniTest::Unit::TestCase
 
     assert a > b
     assert b < a
-    assert_equal -1, b <=> a
+    assert_equal(-1, (b <=> a))
   end
 
   def test_equality

@@ -233,6 +233,44 @@ class TestComputation < MiniTest::Unit::TestCase
     end
   end
 
+
+  def test_no_neighbors
+    nn_graph = nil
+
+    # Test :raise
+    comp = RubyVor::VDDT::Computation.from_points([1,2,3,4,5].map{|xy| RubyVor::Point.new(xy,xy)})
+    comp.no_neighbor_response = :raise
+
+    assert_equal comp.no_neighbor_response, :raise    
+    assert_raises(IndexError) { nn_graph = comp.nn_graph }
+    assert_raises(IndexError) { comp.cluster_by_distance(5) }
+    assert_equal nn_graph, nil
+
+    
+    # Test :use_all (default)
+    comp = RubyVor::VDDT::Computation.from_points([1,2,3,4,5].map{|xy| RubyVor::Point.new(xy,xy)})
+    comp.no_neighbor_response = :use_all
+
+    assert_equal comp.no_neighbor_response, :use_all
+    assert_nothing_raised { nn_graph = comp.nn_graph }
+    assert_nothing_raised do
+      assert_equal comp.cluster_by_distance(5).map{|a| a.sort}.sort, [[0,1,2,3,4]]
+    end
+    refute_equal nn_graph, nil
+
+    
+    # Test :ignore
+    comp = RubyVor::VDDT::Computation.from_points([1,2,3,4,5].map{|xy| RubyVor::Point.new(xy,xy)})
+    comp.no_neighbor_response = :ignore
+
+    assert_equal comp.no_neighbor_response, :ignore
+    assert_nothing_raised { nn_graph = comp.nn_graph }
+    assert_nothing_raised do
+      assert_equal comp.cluster_by_distance(5).map{|a| a.sort}.sort, [[0],[1],[2],[3],[4]]
+    end
+    refute_equal nn_graph, nil
+  end
+
   
   def test_cluster_by_size
     comp = RubyVor::VDDT::Computation.from_points([
@@ -290,6 +328,16 @@ class TestComputation < MiniTest::Unit::TestCase
                 ].map{|x,y| RubyVor::Point.new(x,y)}
     end
     @points
+  end
+  
+  def assert_nothing_raised(&b)
+    begin
+      yield
+    rescue Exception => e
+      flunk "#{mu_pp(e)} exception encountered, expected no exceptions"
+      return
+    end
+    pass()
   end
 end
 

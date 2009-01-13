@@ -1,3 +1,15 @@
+=== 0.1.0 / 2009-01-13
+
+* Configurable handling of "no neighbors" case.
+* Tests for "no neighbors" case.
+
+=== 0.0.9 / 2009-01-01
+
+Happy New Year!
+* New speed improvements.
+* Additional visualization tweaks.
+* More tests.
+
 === 0.0.8 / 2008-12-23
 
 * Several C warning fixes (more ISO C compliance unused variables, etc)
