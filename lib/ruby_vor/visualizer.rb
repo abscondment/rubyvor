@@ -3,8 +3,9 @@ module RubyVor
   class Visualizer
 
     COLORS = %w{black red blue lime gray yellow purple orange pink}
-    
-    include LibXML
+
+    # Support various versions of LibXML
+    include LibXML if defined?(LibXML)
       
     def self.make_svg(computation, opts={})
       @opts = opts = {
