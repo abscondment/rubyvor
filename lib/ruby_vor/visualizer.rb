@@ -1,4 +1,4 @@
-require 'libxml'
+require 'xml/libxml' unless defined?(LibXML)
 module RubyVor
   class Visualizer
 
