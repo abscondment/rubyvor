@@ -1,3 +1,7 @@
+=== 0.1.1 / 2009-01-15
+
+* LibXML require conflict fix.
+
 === 0.1.0 / 2009-01-13
 
 * Configurable handling of "no neighbors" case.
