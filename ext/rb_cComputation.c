@@ -34,7 +34,7 @@ RubyVor_from_points(VALUE self, VALUE pointsArray)
 
     /* Require nonzero size and x & y methods on each array object */
     if (RARRAY(pointsArray)->len < 1)
-        rb_raise(rb_eRuntimeError, "points array have a nonzero length");
+        rb_raise(rb_eRuntimeError, "input points array must have a nonzero length");
     for (i = 0; i < RARRAY(pointsArray)->len; i++) {
         if(!rb_respond_to(RARRAY(pointsArray)->ptr[i], x) || !rb_respond_to(RARRAY(pointsArray)->ptr[i], y))
             rb_raise(rb_eRuntimeError, "members of points array must respond to 'x' and 'y'");

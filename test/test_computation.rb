@@ -9,6 +9,16 @@ class TestComputation < MiniTest::Unit::TestCase
     super(*args)
   end
 
+  def test_empty_points
+    assert_raises TypeError do
+      RubyVor::VDDT::Computation.from_points(nil)
+    end
+    
+    assert_raises RuntimeError do
+      RubyVor::VDDT::Computation.from_points([])
+    end
+  end
+
   def test_nn_graph
     comp = RubyVor::VDDT::Computation.from_points(sample_points)
     
