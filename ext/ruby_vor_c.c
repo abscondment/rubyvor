@@ -2,6 +2,15 @@
 #include <vdefs.h>
 #include <ruby_vor_c.h>
 
+/* Classes & Modules */
+static VALUE RubyVor_rb_mRubyVor;
+static VALUE RubyVor_rb_mVDDT;
+
+static VALUE RubyVor_rb_cComputation;
+static VALUE RubyVor_rb_cPriorityQueue;
+static VALUE RubyVor_rb_cQueueItem;
+static VALUE RubyVor_rb_cPoint;
+
 /*
  * Extension initialization
  */
