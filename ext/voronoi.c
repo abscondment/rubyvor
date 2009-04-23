@@ -5,6 +5,8 @@
 #include <vdefs.h>
 #include <stdio.h>
 
+VoronoiState rubyvorState;
+
 /* Static method definitions: C -> Ruby storage methods. */
 static void storeTriangulationTriplet(const int, const int, const int);
 static void storeLine(const float, const float, const float);

@@ -126,6 +126,82 @@ RubyVor_from_points(VALUE self, VALUE pointsArray)
  */
 
 VALUE
+RubyVor_nn_graph(VALUE self)
+{
+    VALUE dtRaw, graph, points, * dtPtr, * tripletPtr, * graphPtr;
+    long i, j, noNeighborResponse;
+
+    graph = rb_iv_get(self, "@nn_graph");
+    
+    if (RTEST(graph))
+        return graph;
+
+    /* Figure out our "no neighbor" response value */
+    if (SYM2ID(rb_iv_get(self, "@no_neighbor_response")) == rb_intern("raise")) {
+        noNeighborResponse = 1;
+    } else if (SYM2ID(rb_iv_get(self, "@no_neighbor_response")) == rb_intern("use_all")) {
+        noNeighborResponse = 2;
+    } else {
+        noNeighborResponse = 0;
+    }
+
+    /* Create an array of same size as points for the graph */
+    points = rb_iv_get(self, "@points");
+    
+    graph = rb_ary_new2(RARRAY(points)->len);
+    for (i = 0; i < RARRAY(points)->len; i++)
+        rb_ary_push(graph, rb_ary_new());
+    
+    /* Get our pointer into this array. */
+    graphPtr = RARRAY(graph)->ptr;
+
+    /* Iterate over the triangulation */
+    dtRaw = rb_iv_get(self, "@delaunay_triangulation_raw");
+    dtPtr = RARRAY(dtRaw)->ptr;
+    for (i = 0; i < RARRAY(dtRaw)->len; i++) {
+        tripletPtr = RARRAY(dtPtr[i])->ptr;
+
+        rb_ary_push(graphPtr[FIX2INT(tripletPtr[0])], tripletPtr[1]);
+        rb_ary_push(graphPtr[FIX2INT(tripletPtr[1])], tripletPtr[0]);
+
+        rb_ary_push(graphPtr[FIX2INT(tripletPtr[0])], tripletPtr[2]);
+        rb_ary_push(graphPtr[FIX2INT(tripletPtr[2])], tripletPtr[0]);
+
+        rb_ary_push(graphPtr[FIX2INT(tripletPtr[1])], tripletPtr[2]);
+        rb_ary_push(graphPtr[FIX2INT(tripletPtr[2])], tripletPtr[1]);
+        
+    }
+    for (i = 0; i < RARRAY(graph)->len; i++) {
+        if (RARRAY(graphPtr[i])->len < 1) {
+            /* Evaluate noNeighborResponse and respond accordingly */
+            if (noNeighborResponse == 1) {
+                rb_raise(rb_eIndexError, "index of 0 (no neighbors) at %i", i);
+            } else if (noNeighborResponse == 2) {
+                /* No valid triangles touched this node -- include *all* possible neighbors
+                 *
+                 * Note that this can make for exceptionally slow (ie O(n^2) time) clustering,
+                 * but should only happen in rare cases.
+                 */
+                for(j = 0; j < RARRAY(points)->len; j++) {
+                    if (j != i) {
+                        rb_ary_push(graphPtr[i], INT2FIX(j));
+                        if (RARRAY(graphPtr[j])->len > 0 && !rb_ary_includes(graphPtr[j], INT2FIX(i)))
+                            rb_ary_push(graphPtr[j], INT2FIX(i));
+                    }
+                }
+            }
+        } else {
+            rb_funcall(graphPtr[i], rb_intern("uniq!"), 0);
+        }
+    }
+
+    rb_iv_set(self, "@nn_graph", graph);
+    
+    return graph;
+}
+
+
+VALUE
 RubyVor_minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
 {
     VALUE mst, dist_proc, nodes, nnGraph, points, queue, tmp, adjacent, adjacentData, adjacentDistance, current, currentData, floatMax;
@@ -242,83 +318,6 @@ RubyVor_minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
     
     return mst;
 }
-
-
-VALUE
-RubyVor_nn_graph(VALUE self)
-{
-    VALUE dtRaw, graph, points, * dtPtr, * tripletPtr, * graphPtr;
-    long i, j, noNeighborResponse;
-
-    graph = rb_iv_get(self, "@nn_graph");
-    
-    if (RTEST(graph))
-        return graph;
-
-    /* Figure out our "no neighbor" response value */
-    if (SYM2ID(rb_iv_get(self, "@no_neighbor_response")) == rb_intern("raise")) {
-        noNeighborResponse = 1;
-    } else if (SYM2ID(rb_iv_get(self, "@no_neighbor_response")) == rb_intern("use_all")) {
-        noNeighborResponse = 2;
-    } else {
-        noNeighborResponse = 0;
-    }
-
-    /* Create an array of same size as points for the graph */
-    points = rb_iv_get(self, "@points");
-    
-    graph = rb_ary_new2(RARRAY(points)->len);
-    for (i = 0; i < RARRAY(points)->len; i++)
-        rb_ary_push(graph, rb_ary_new());
-    
-    /* Get our pointer into this array. */
-    graphPtr = RARRAY(graph)->ptr;
-
-    /* Iterate over the triangulation */
-    dtRaw = rb_iv_get(self, "@delaunay_triangulation_raw");
-    dtPtr = RARRAY(dtRaw)->ptr;
-    for (i = 0; i < RARRAY(dtRaw)->len; i++) {
-        tripletPtr = RARRAY(dtPtr[i])->ptr;
-
-        rb_ary_push(graphPtr[FIX2INT(tripletPtr[0])], tripletPtr[1]);
-        rb_ary_push(graphPtr[FIX2INT(tripletPtr[1])], tripletPtr[0]);
-
-        rb_ary_push(graphPtr[FIX2INT(tripletPtr[0])], tripletPtr[2]);
-        rb_ary_push(graphPtr[FIX2INT(tripletPtr[2])], tripletPtr[0]);
-
-        rb_ary_push(graphPtr[FIX2INT(tripletPtr[1])], tripletPtr[2]);
-        rb_ary_push(graphPtr[FIX2INT(tripletPtr[2])], tripletPtr[1]);
-        
-    }
-    for (i = 0; i < RARRAY(graph)->len; i++) {
-        if (RARRAY(graphPtr[i])->len < 1) {
-            /* Evaluate noNeighborResponse and respond accordingly */
-            if (noNeighborResponse == 1) {
-                rb_raise(rb_eIndexError, "index of 0 (no neighbors) at %i", i);
-            } else if (noNeighborResponse == 2) {
-                /* No valid triangles touched this node -- include *all* possible neighbors
-                 *
-                 * Note that this can make for exceptionally slow (ie O(n^2) time) clustering,
-                 * but should only happen in rare cases.
-                 */
-                for(j = 0; j < RARRAY(points)->len; j++) {
-                    if (j != i) {
-                        rb_ary_push(graphPtr[i], INT2FIX(j));
-                        if (RARRAY(graphPtr[j])->len > 0 && !rb_ary_includes(graphPtr[j], INT2FIX(i)))
-                            rb_ary_push(graphPtr[j], INT2FIX(i));
-                    }
-                }
-            }
-        } else {
-            rb_funcall(graphPtr[i], rb_intern("uniq!"), 0);
-        }
-    }
-
-    rb_iv_set(self, "@nn_graph", graph);
-    
-    return graph;
-}
-
 
 
 /*

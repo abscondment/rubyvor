@@ -4,8 +4,6 @@
 
 #include "vdefs.h"
 
-VoronoiState rubyvorState;
-
 static int PQmin, PQcount, PQhashsize ;
 static Halfedge * PQhash ;
 

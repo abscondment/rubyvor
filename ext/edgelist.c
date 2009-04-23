@@ -3,8 +3,6 @@
 
 #include "vdefs.h"
 
-VoronoiState rubyvorState;
-
 static int ELhashsize ;
 static Halfedge * ELleftend, * ELrightend, ** ELhash ;
 static Freelist hfl ;

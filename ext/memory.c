@@ -7,8 +7,6 @@
 
 #include "vdefs.h"
 
-VoronoiState rubyvorState;
-
 static char** memory_map;
 static int nallocs = 0;
 

@@ -5,8 +5,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-VoronoiState rubyvorState;
-
 static float pxmin, pxmax, pymin, pymax, cradius;
 
 void openpl(void) {}

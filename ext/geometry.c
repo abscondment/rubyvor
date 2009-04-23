@@ -4,8 +4,6 @@
 #include <math.h>
 #include "vdefs.h"
 
-VoronoiState rubyvorState;
-
 static Freelist efl;
 
 void

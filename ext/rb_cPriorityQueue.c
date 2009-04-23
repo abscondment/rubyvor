@@ -14,16 +14,17 @@ compare(VALUE a, VALUE b)
     ID minDistance;
     minDistance = ID2SYM(rb_intern("min_distance"));
 
-    if (rb_class_of(a) == RubyVor_rb_cQueueItem)
+    if (CLASS_OF(a) == rb_path2class("RubyVor::PriorityQueue::QueueItem"))
         aD = NUM2DBL(rb_funcall(a, rb_intern("priority"), 0));
     else
-        rb_raise(rb_eTypeError, "wrong argument type %s (expected %s)", rb_obj_classname(a), rb_class2name(RubyVor_rb_cQueueItem));
-    
-    if (rb_class_of(b) == RubyVor_rb_cQueueItem)
+      rb_raise(rb_eTypeError, "wrong argument type %s (expected %s)", rb_obj_classname(a), rb_path2class("RubyVor::PriorityQueue::QueueItem"));
+
+    if (CLASS_OF(a) == rb_path2class("RubyVor::PriorityQueue::QueueItem"))
+
         bD = NUM2DBL(rb_funcall(b, rb_intern("priority"), 0));
     else
-        rb_raise(rb_eTypeError, "wrong argument type %s (expected %s)", rb_obj_classname(b), rb_class2name(RubyVor_rb_cQueueItem));
-    
+      rb_raise(rb_eTypeError, "wrong argument type %s (expected %s)", rb_obj_classname(a), rb_path2class("RubyVor::PriorityQueue::QueueItem"));
+
     return RTEST(aD < bD);
 }
 
