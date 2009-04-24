@@ -1,3 +1,7 @@
+=== 0.1.2 / 2009-04-24
+
+* Compilation fixes for OSX. Thanks to jpemberthy and febuiles!
+
 === 0.1.1 / 2009-01-15
 
 * LibXML require conflict fix.
