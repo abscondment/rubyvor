@@ -47,18 +47,18 @@ RubyVor_percolate_up(VALUE self, VALUE index)
     
     j = i / 2;
     
-    item = RARRAY(data)->ptr[i - 1];
+    item = RARRAY_PTR(data)[i - 1];
 
-    while(j > 0 && compare(item, RARRAY(data)->ptr[j - 1]))
+    while(j > 0 && compare(item, RARRAY_PTR(data)[j - 1]))
     {
-        rb_ary_store(data, i-1, RARRAY(data)->ptr[j - 1]);
-        rb_funcall(RARRAY(data)->ptr[i-1], rb_intern("index="), 1, INT2FIX(i-1));
+        rb_ary_store(data, i-1, RARRAY_PTR(data)[j - 1]);
+        rb_funcall(RARRAY_PTR(data)[i-1], rb_intern("index="), 1, INT2FIX(i-1));
         i = j;
         j = j / 2;
     }
 
     rb_ary_store(data, i-1, item);
-    rb_funcall(RARRAY(data)->ptr[i-1], rb_intern("index="), 1, INT2FIX(i-1));
+    rb_funcall(RARRAY_PTR(data)[i-1], rb_intern("index="), 1, INT2FIX(i-1));
     
     return Qnil;
 }
@@ -83,26 +83,26 @@ RubyVor_percolate_down(VALUE self, VALUE index)
     
     j = size / 2;
 
-    item = RARRAY(data)->ptr[i - 1];
+    item = RARRAY_PTR(data)[i - 1];
 
     while (!(i > j))
     {
         k = i * 2;
-        if (k < size && compare(RARRAY(data)->ptr[k], RARRAY(data)->ptr[k - 1]))
+        if (k < size && compare(RARRAY_PTR(data)[k], RARRAY_PTR(data)[k - 1]))
             k++;
 
-        if (compare(item, RARRAY(data)->ptr[k - 1]))
+        if (compare(item, RARRAY_PTR(data)[k - 1]))
             j = -1;
         else
         {
-            rb_ary_store(data, i-1, RARRAY(data)->ptr[k - 1]);
-            rb_funcall(RARRAY(data)->ptr[i-1], rb_intern("index="), 1, INT2FIX(i-1));
+            rb_ary_store(data, i-1, RARRAY_PTR(data)[k - 1]);
+            rb_funcall(RARRAY_PTR(data)[i-1], rb_intern("index="), 1, INT2FIX(i-1));
             i = k;
         }
     }
 
     rb_ary_store(data, i-1, item);
-    rb_funcall(RARRAY(data)->ptr[i-1], rb_intern("index="), 1, INT2FIX(i-1));
+    rb_funcall(RARRAY_PTR(data)[i-1], rb_intern("index="), 1, INT2FIX(i-1));
     
     return Qnil;
 }

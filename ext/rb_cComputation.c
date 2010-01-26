@@ -33,17 +33,17 @@ RubyVor_from_points(VALUE self, VALUE pointsArray)
 
 
     /* Require nonzero size and x & y methods on each array object */
-    if (RARRAY(pointsArray)->len < 1)
+    if (RARRAY_LEN(pointsArray) < 1)
         rb_raise(rb_eRuntimeError, "input points array must have a nonzero length");
-    for (i = 0; i < RARRAY(pointsArray)->len; i++) {
-        if(!rb_respond_to(RARRAY(pointsArray)->ptr[i], x) || !rb_respond_to(RARRAY(pointsArray)->ptr[i], y))
+    for (i = 0; i < RARRAY_LEN(pointsArray); i++) {
+        if(!rb_respond_to(RARRAY_PTR(pointsArray)[i], x) || !rb_respond_to(RARRAY_PTR(pointsArray)[i], y))
             rb_raise(rb_eRuntimeError, "members of points array must respond to 'x' and 'y'");
     }
 
     /* Load up point count & points pointer. */
     pointsArray = rb_funcall(pointsArray, rb_intern("uniq"), 0);
-    inSize = RARRAY(pointsArray)->len;
-    inPtr  = RARRAY(pointsArray)->ptr;
+    inSize = RARRAY_LEN(pointsArray);
+    inPtr  = RARRAY_PTR(pointsArray);
 
     
     /* Initialize rubyvorState */
@@ -148,18 +148,18 @@ RubyVor_nn_graph(VALUE self)
     /* Create an array of same size as points for the graph */
     points = rb_iv_get(self, "@points");
     
-    graph = rb_ary_new2(RARRAY(points)->len);
-    for (i = 0; i < RARRAY(points)->len; i++)
+    graph = rb_ary_new2(RARRAY_LEN(points));
+    for (i = 0; i < RARRAY_LEN(points); i++)
         rb_ary_push(graph, rb_ary_new());
     
     /* Get our pointer into this array. */
-    graphPtr = RARRAY(graph)->ptr;
+    graphPtr = RARRAY_PTR(graph);
 
     /* Iterate over the triangulation */
     dtRaw = rb_iv_get(self, "@delaunay_triangulation_raw");
-    dtPtr = RARRAY(dtRaw)->ptr;
-    for (i = 0; i < RARRAY(dtRaw)->len; i++) {
-        tripletPtr = RARRAY(dtPtr[i])->ptr;
+    dtPtr = RARRAY_PTR(dtRaw);
+    for (i = 0; i < RARRAY_LEN(dtRaw); i++) {
+        tripletPtr = RARRAY_PTR(dtPtr[i]);
 
         rb_ary_push(graphPtr[FIX2INT(tripletPtr[0])], tripletPtr[1]);
         rb_ary_push(graphPtr[FIX2INT(tripletPtr[1])], tripletPtr[0]);
@@ -171,8 +171,8 @@ RubyVor_nn_graph(VALUE self)
         rb_ary_push(graphPtr[FIX2INT(tripletPtr[2])], tripletPtr[1]);
         
     }
-    for (i = 0; i < RARRAY(graph)->len; i++) {
-        if (RARRAY(graphPtr[i])->len < 1) {
+    for (i = 0; i < RARRAY_LEN(graph); i++) {
+        if (RARRAY_LEN(graphPtr[i]) < 1) {
             /* Evaluate noNeighborResponse and respond accordingly */
             if (noNeighborResponse == 1) {
                 rb_raise(rb_eIndexError, "index of 0 (no neighbors) at %i", i);
@@ -182,10 +182,10 @@ RubyVor_nn_graph(VALUE self)
                  * Note that this can make for exceptionally slow (ie O(n^2) time) clustering,
                  * but should only happen in rare cases.
                  */
-                for(j = 0; j < RARRAY(points)->len; j++) {
+                for(j = 0; j < RARRAY_LEN(points); j++) {
                     if (j != i) {
                         rb_ary_push(graphPtr[i], INT2FIX(j));
-                        if (RARRAY(graphPtr[j])->len > 0 && !rb_ary_includes(graphPtr[j], INT2FIX(i)))
+                        if (RARRAY_LEN(graphPtr[j]) > 0 && !rb_ary_includes(graphPtr[j], INT2FIX(i)))
                             rb_ary_push(graphPtr[j], INT2FIX(i));
                     }
                 }
@@ -236,14 +236,14 @@ RubyVor_minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
     nnGraph = RubyVor_nn_graph(self);
     floatMax= rb_iv_get(rb_cFloat, "MAX");
 
-    for (i = 0; i < RARRAY(points)->len; i++) {
+    for (i = 0; i < RARRAY_LEN(points); i++) {
         tmp = rb_ary_new2(5);
         /* 0: node index */
         rb_ary_push(tmp, LONG2FIX(i));
         /* 1: parent */
         rb_ary_push(tmp, Qnil);
         /* 2: adjacency_list */
-        rb_ary_push(tmp, rb_obj_clone(RARRAY(nnGraph)->ptr[i]));
+        rb_ary_push(tmp, rb_obj_clone(RARRAY_PTR(nnGraph)[i]));
         /* 3: min_adjacency_list */
         rb_ary_push(tmp, rb_ary_new());
         /* 4: in_q */
@@ -260,28 +260,28 @@ RubyVor_minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
         rb_ary_store(currentData, 4, Qfalse);
 
         /* check for presence of parent */
-        if (RTEST(RARRAY(currentData)->ptr[1])) {
+        if (RTEST(RARRAY_PTR(currentData)[1])) {
             /* push this node into adjacency_list of parent */
-            rb_ary_push(RARRAY(rb_iv_get(RARRAY(currentData)->ptr[1], "@data"))->ptr[3], current);
+            rb_ary_push(RARRAY_PTR(rb_iv_get(RARRAY_PTR(currentData)[1], "@data"))[3], current);
             /* push parent into adjacency_list of this node */
-            rb_ary_push(RARRAY(currentData)->ptr[3], RARRAY(currentData)->ptr[1]);
+            rb_ary_push(RARRAY_PTR(currentData)[3], RARRAY_PTR(currentData)[1]);
         }
 
-        for (i = 0; i < RARRAY(RARRAY(currentData)->ptr[2])->len; i++) {
+        for (i = 0; i < RARRAY_LEN(RARRAY_PTR(currentData)[2]); i++) {
             /* grab indexed node */
-            adjacent = RARRAY(nodes)->ptr[FIX2LONG(RARRAY(RARRAY(currentData)->ptr[2])->ptr[i])];
+            adjacent = RARRAY_PTR(nodes)[FIX2LONG(RARRAY_PTR(RARRAY_PTR(currentData)[2])[i])];
             adjacentData = rb_iv_get(adjacent, "@data");
         
             /* check in_q -- only look at new nodes */
-            if (Qtrue == RARRAY(adjacentData)->ptr[4]) {
+            if (Qtrue == RARRAY_PTR(adjacentData)[4]) {
 
                 /* compare points by node -- adjacent against current */
                 adjacentDistance = rb_funcall(dist_proc, i_call, 2,
-                                              RARRAY(points)->ptr[FIX2LONG(RARRAY(currentData)->ptr[0])],
-                                              RARRAY(points)->ptr[FIX2LONG(RARRAY(adjacentData)->ptr[0])]);
+                                              RARRAY_PTR(points)[FIX2LONG(RARRAY_PTR(currentData)[0])],
+                                              RARRAY_PTR(points)[FIX2LONG(RARRAY_PTR(adjacentData)[0])]);
 
                 /* If the new distance is better than our current priority, exchange them. */
-                if (RFLOAT(adjacentDistance)->value < RFLOAT(rb_iv_get(adjacent, "@priority"))->value) {
+                if (RFLOAT_VALUE(adjacentDistance) < RFLOAT_VALUE(rb_iv_get(adjacent, "@priority"))) {
                     /* set new :parent */
                     rb_ary_store(adjacentData, 1, current);
                     /* update priority */
@@ -294,18 +294,18 @@ RubyVor_minimum_spanning_tree(int argc, VALUE *argv, VALUE self)
     }
 
     mst = rb_hash_new();
-    for (i = 0; i < RARRAY(nodes)->len; i++) {
-        current = RARRAY(nodes)->ptr[i];
+    for (i = 0; i < RARRAY_LEN(nodes); i++) {
+        current = RARRAY_PTR(nodes)[i];
         currentData = rb_iv_get(current, "@data");
-        if (!NIL_P(RARRAY(currentData)->ptr[1])) {
-            adjacentData = rb_iv_get(RARRAY(currentData)->ptr[1], "@data");
+        if (!NIL_P(RARRAY_PTR(currentData)[1])) {
+            adjacentData = rb_iv_get(RARRAY_PTR(currentData)[1], "@data");
             tmp = rb_ary_new2(2);
-            if (FIX2LONG(RARRAY(currentData)->ptr[0]) < FIX2LONG(RARRAY(adjacentData)->ptr[0])) {
-                rb_ary_push(tmp, RARRAY(currentData)->ptr[0]);
-                rb_ary_push(tmp, RARRAY(adjacentData)->ptr[0]);
+            if (FIX2LONG(RARRAY_PTR(currentData)[0]) < FIX2LONG(RARRAY_PTR(adjacentData)[0])) {
+                rb_ary_push(tmp, RARRAY_PTR(currentData)[0]);
+                rb_ary_push(tmp, RARRAY_PTR(adjacentData)[0]);
             } else {
-                rb_ary_push(tmp, RARRAY(adjacentData)->ptr[0]);                
-                rb_ary_push(tmp, RARRAY(currentData)->ptr[0]);
+                rb_ary_push(tmp, RARRAY_PTR(adjacentData)[0]);                
+                rb_ary_push(tmp, RARRAY_PTR(currentData)[0]);
             }
             
             /* if (!st_lookup(RHASH(mst)->tbl, tmp, 0)) { */

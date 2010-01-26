@@ -4,7 +4,7 @@ require 'rubygems'
 require 'hoe'
 require './lib/ruby_vor/version.rb'
 
-EXT = "ext/voronoi_interface.#{Hoe::DLEXT}"
+EXT = "ext/voronoi_interface.#{Config::CONFIG['DLEXT']}"
 
 Hoe.new('rubyvor', RubyVor::VERSION) do |p|
   p.developer('Brendan Ribera', 'brendan.ribera+rubyvor@gmail.com')  

@@ -11,6 +11,18 @@ static VALUE RubyVor_rb_cPriorityQueue;
 static VALUE RubyVor_rb_cQueueItem;
 static VALUE RubyVor_rb_cPoint;
 
+#ifndef RUBY_19
+#ifndef RFLOAT_VALUE
+#define RFLOAT_VALUE(v) (RFLOAT(v)->value)
+#endif
+#ifndef RARRAY_LEN
+#define RARRAY_LEN(v) (RARRAY(v)->len)
+#endif
+#ifndef RARRAY_PTR
+#define RARRAY_PTR(v) (RARRAY(v)->ptr)
+#endif
+#endif
+
 /*
  * Extension initialization
  */
