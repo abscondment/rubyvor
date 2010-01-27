@@ -66,10 +66,13 @@ module RubyVor
     protected
 
     # Implemented in C
-    def percolate_up(i);end
+    # def heapify(data);end
 
     # Implemented in C
-    def percolate_down(i);end
+    # def percolate_up(i);end
+
+    # Implemented in C
+    # def percolate_down(i);end
 
     class QueueItem
       attr_accessor :priority, :index, :data
