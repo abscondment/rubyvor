@@ -2,17 +2,23 @@
 
 require 'rubygems'
 require 'hoe'
-require './lib/ruby_vor/version.rb'
+require 'lib/ruby_vor/version.rb'
 
 EXT = "ext/voronoi_interface.#{Config::CONFIG['DLEXT']}"
 
-Hoe.new('rubyvor', RubyVor::VERSION) do |p|
-  p.developer('Brendan Ribera', 'brendan.ribera+rubyvor@gmail.com')  
-  p.url = 'http://github.com/bribera/rubyvor'
+Hoe.spec 'rubyvor' do
+  developer 'Brendan Ribera', 'brendan.ribera+rubyvor@gmail.com'
+  
+  self.version      = RubyVor::VERSION
+  self.url          = 'http://github.com/bribera/rubyvor'
+  self.readme_file  = 'README.rdoc'
+  self.history_file = 'History.rdoc'
+  self.summary      = 'Efficient Voronoi diagrams and Delaunay trianglation for Ruby'
+  self.description  = 'RubyVor provides efficient computation of Voronoi diagrams and Delaunay triangulation for a set of Ruby points. It is intended to function as a complemenet to GeoRuby. These structures can be used to compute a nearest-neighbor graph for a set of points. This graph can in turn be used for proximity-based clustering of the input points.'
 
   # C extension goodness
-  p.spec_extras[:extensions] = "ext/extconf.rb"
-  p.clean_globs << EXT << 'ext/*.o' << 'ext/Makefile'
+  self.spec_extras[:extensions] = "ext/extconf.rb"
+  self.clean_globs << EXT << 'ext/*.o' << 'ext/Makefile'
 end
 
 desc "Compile extensions"
