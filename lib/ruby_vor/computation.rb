@@ -42,12 +42,11 @@ module RubyVor
         graph    = []
         v = 0
         
-        nn_graph.each_with_index do |neighbors,v|
-          graph[v] = neighbors.select do |neighbor|
-            dist_proc[points[v], points[neighbor]] < max_distance
+        nn_graph.each_with_index do |neighbors,nv|
+          graph[nv] = neighbors.select do |neighbor|
+            dist_proc[points[nv], points[neighbor]] < max_distance
           end
         end
-
         
         until nodes.empty?
           v = nodes.pop
