@@ -175,7 +175,7 @@ RubyVor_nn_graph(VALUE self)
         if (RARRAY_LEN(graphPtr[i]) < 1) {
             /* Evaluate noNeighborResponse and respond accordingly */
             if (noNeighborResponse == 1) {
-                rb_raise(rb_eIndexError, "index of 0 (no neighbors) at %i", i);
+                rb_raise(rb_eIndexError, "index of 0 (no neighbors) at %li", i);
             } else if (noNeighborResponse == 2) {
                 /* No valid triangles touched this node -- include *all* possible neighbors
                  *

@@ -17,13 +17,12 @@ compare(VALUE a, VALUE b)
     if (CLASS_OF(a) == rb_path2class("RubyVor::PriorityQueue::QueueItem"))
         aD = NUM2DBL(rb_funcall(a, rb_intern("priority"), 0));
     else
-      rb_raise(rb_eTypeError, "wrong argument type %s (expected %s)", rb_obj_classname(a), rb_path2class("RubyVor::PriorityQueue::QueueItem"));
+      rb_raise(rb_eTypeError, "wrong argument type %s (expected %s)", rb_obj_classname(a), rb_obj_classname(rb_path2class("RubyVor::PriorityQueue::QueueItem")));
 
     if (CLASS_OF(a) == rb_path2class("RubyVor::PriorityQueue::QueueItem"))
-
         bD = NUM2DBL(rb_funcall(b, rb_intern("priority"), 0));
     else
-      rb_raise(rb_eTypeError, "wrong argument type %s (expected %s)", rb_obj_classname(a), rb_path2class("RubyVor::PriorityQueue::QueueItem"));
+      rb_raise(rb_eTypeError, "wrong argument type %s (expected %s)", rb_obj_classname(a), rb_obj_classname(rb_path2class("RubyVor::PriorityQueue::QueueItem")));
 
     return RTEST(aD < bD);
 }
@@ -43,7 +42,7 @@ RubyVor_percolate_up(VALUE self, VALUE index)
     i = FIX2INT(index) + 1;
 
     if (i < 1 || i > size)
-        rb_raise(rb_eIndexError, "index %i out of range", i-1);
+        rb_raise(rb_eIndexError, "index %li out of range", i-1);
     
     j = i / 2;
     
@@ -79,7 +78,7 @@ RubyVor_percolate_down(VALUE self, VALUE index)
     i = FIX2INT(index) + 1;
     
     if (i < 1 || i > size)
-        rb_raise(rb_eIndexError, "index %i out of range", i-1);
+        rb_raise(rb_eIndexError, "index %li out of range", i-1);
     
     j = size / 2;
 
