@@ -16,6 +16,10 @@ Hoe.spec 'rubyvor' do
   self.summary      = 'Efficient Voronoi diagrams and Delaunay trianglation for Ruby'
   self.description  = 'RubyVor provides efficient computation of Voronoi diagrams and Delaunay triangulation for a set of Ruby points. It is intended to function as a complemenet to GeoRuby. These structures can be used to compute a nearest-neighbor graph for a set of points. This graph can in turn be used for proximity-based clustering of the input points.'
 
+  extra_dev_deps << ["minitest", ">= 1.6.0"]
+  extra_deps << ["libxml-ruby", ">= 0.9.9"]
+  extra_deps << ["GeoRuby", ">= 1.3.0"]
+  
   # C extension goodness
   self.spec_extras[:extensions] = "ext/extconf.rb"
   self.clean_globs << EXT << 'ext/*.o' << 'ext/Makefile'
