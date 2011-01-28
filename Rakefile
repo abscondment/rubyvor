@@ -2,7 +2,7 @@
 
 require 'rubygems'
 require 'hoe'
-require 'lib/ruby_vor/version.rb'
+require './lib/ruby_vor/version.rb'
 
 EXT = "ext/voronoi_interface.#{Config::CONFIG['DLEXT']}"
 
