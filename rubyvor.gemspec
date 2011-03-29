@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.extensions = ["ext/extconf.rb"]
   s.extra_rdoc_files = ["Manifest.txt"]
   s.files = ["History.rdoc", "Manifest.txt", "README.rdoc", "Rakefile", "ext/Doc", "ext/edgelist.c", "ext/extconf.rb", "ext/geometry.c", "ext/heap.c", "ext/memory.c", "ext/output.c", "ext/rb_cComputation.c", "ext/rb_cPoint.c", "ext/rb_cPriorityQueue.c", "ext/ruby_vor_c.c", "ext/ruby_vor_c.h", "ext/vdefs.h", "ext/voronoi.c", "lib/rubyvor.rb", "lib/ruby_vor.rb", "lib/ruby_vor/computation.rb", "lib/ruby_vor/geo_ruby_extensions.rb", "lib/ruby_vor/point.rb", "lib/ruby_vor/priority_queue.rb", "lib/ruby_vor/version.rb", "lib/ruby_vor/visualizer.rb", "rubyvor.gemspec", "test/test_computation.rb", "test/test_point.rb", "test/test_priority_queue.rb", "test/test_voronoi_interface.rb"]
-  s.homepage = %q{http://github.com/bribera/rubyvor}
+  s.homepage = %q{https://github.com/abscondment/rubyvor}
   s.rdoc_options = ["--main", "README.rdoc"]
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{rubyvor}
