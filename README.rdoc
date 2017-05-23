@@ -1,6 +1,6 @@
 = rubyvor
 
-Efficient Voronoi diagrams and Delaunay trianglation for Ruby
+Efficient Voronoi diagrams and Delaunay triangulation for Ruby
 
 == Description
 
